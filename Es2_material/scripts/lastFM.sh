@@ -13,7 +13,7 @@ $MYHADOOP_HOME/bin/myhadoop-configure.sh -c $HADOOP_CONF_DIR
 $HADOOP_HOME/sbin/start-dfs.sh
 
 $HADOOP_HOME/bin/hdfs dfs -mkdir /user
-$HADOOP_HOME/bin/hdfs dfs -mkdir /user/rdevirgi
+$HADOOP_HOME/bin/hdfs dfs -mkdir /user/a08trb23
 
 $HADOOP_HOME/bin/hdfs dfs -put $HADOOP_HOME/etc/hadoop input
 

@@ -1,3 +1,10 @@
+Class ProductEntry
+	- name 	:String;
+	- sum	:Integer;
+	
+	getters e setters...
+
+
 map(key, row)
 	foreach entry in row
 		month = getMonth(row)
@@ -7,14 +14,26 @@ map(key, row)
 
 
 reduce(month, productEntries[])
-	map = initMap() //key: productName; value: sum;
+	//la chiave della mappa corrisponde al valore del campo
+	//name dell'oggetto ProductEntry
+	map = initMap() //key: productName; value: ProducyEntry object;
 	foreach entry in productEntries
-		oldSum = map.get(entry.getName())
+		productSum = map.get(entry.getName())
+		
+		if (productSum == NIL)
+			productSum = new ProductEntry()
+			map.push(entry.getName(), productSum)
+		
+		oldSum = productCount.getSum()
 		newSum = oldSum + entry.getCount()
-		map.push(entry.getName(), newSum())
+		
+		productSum.setSum(newSum)
+		//inutile, perché già c'è la mappa referenzia al productSum aggiornato
+		//map.push(entry.getName(), productSum)
 
-	map.sort(sortByDescSum)
+	sumProductEntries = map.getArray()
+	sumProductEntries.sort(compareBySum) //Comparatore per sum come parametro
+	
+	sumProductEntries.filter(5) //filtra i primi 5 prodotti più venduti
 
-	map.filter(5) //filter the first 5 entries
-
-	Emit(month, map)
+	Emit(month, sumProductEntries)

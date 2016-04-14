@@ -11,29 +11,24 @@ map(key, row)
 		products = splitProducts(entry)
 		foreach product in products
 			Emit(month, new ProductEntry(product, 1))
-
-
-reduce(month, productEntries[])
-	//la chiave della mappa corrisponde al valore del campo
-	//name dell'oggetto ProductEntry
-	map = initMap() //key: productName; value: ProducyEntry object;
-	foreach entry in productEntries
-		productSum = map.get(entry.getName())
-		
-		if (productSum == NIL)
-			productSum = new ProductEntry()
-			map.push(entry.getName(), productSum)
-		
-		oldSum = productCount.getSum()
-		newSum = oldSum + entry.getCount()
-		
-		productSum.setSum(newSum)
-		//inutile, perché già c'è la mappa referenzia al productSum aggiornato
-		//map.push(entry.getName(), productSum)
-
-	sumProductEntries = map.getArray()
-	sumProductEntries.sort(compareBySum) //Comparatore per sum come parametro
 	
-	sumProductEntries.filter(5) //filtra i primi 5 prodotti più venduti
-
-	Emit(month, sumProductEntries)
+reduce2(month, productEntries[])
+	map = initMap(); //key: productName; value: productEntry object
+	foreach entry in productEntries
+		productName = entry.getName()
+		product = map.get(productName)
+		
+		if (product == NIL)  //Se non esiste una entry con il nome attualmente esaminato
+			product = new ProductEntry()
+			map.push(productName, product)
+		else
+			oldSum = product.getSum()
+			newSum = oldSum + entry.getSum()
+	
+	//A questo punto abbiamo i conteggi di tutti i prodotti contenuti nell'array productEntries per il mese corrente
+	productAndSums = map.getArray()
+	productAndSums.sort(compareBySum) //Comparatore per sum come parametro
+	
+	productAndSums.filter(5) //Filtra i primi 5 prodotti pi� venduti per il mese considerato
+	
+	Emit(month, productAndSums) 

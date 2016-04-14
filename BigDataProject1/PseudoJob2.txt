@@ -1,0 +1,9 @@
+//https://stackoverflow.com/questions/16222205/use-global-variable-in-reudcer-class
+//usare metodo setup per leggere i dati da file esterno
+//e creare configurazione per impostare il prezzo dei prodotti
+
+map(key, row)
+//emit per [mese, 1]?
+
+reduce(month, monthEntries[])
+	

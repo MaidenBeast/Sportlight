@@ -6,11 +6,10 @@ Class ProductEntry
 
 
 map(key, row)
-	foreach entry in row
-		month = getMonth(row)
-		products = splitProducts(entry)
-		foreach product in products
-			Emit(month, new ProductEntry(product, 1))
+	month = getMonth(row)
+	products = splitProducts(row)
+	foreach product in products
+		Emit(month, new ProductEntry(product, 1))
 	
 reduce2(month, productEntries[])
 	map = initMap(); //key: productName; value: productEntry object

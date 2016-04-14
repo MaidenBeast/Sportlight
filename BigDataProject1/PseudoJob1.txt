@@ -1,0 +1,20 @@
+map(key, row)
+	foreach entry in row
+		month = getMonth(row)
+		products = splitProducts(entry)
+		foreach product in products
+			Emit(month, new ProductEntry(product, 1))
+
+
+reduce(month, productEntries[])
+	map = initMap() //key: productName; value: sum;
+	foreach entry in productEntries
+		oldSum = map.get(entry.getName())
+		newSum = oldSum + entry.getCount()
+		map.push(entry.getName(), newSum())
+
+	map.sort(sortByDescSum)
+
+	map.filter(5) //filter the first 5 entries
+
+	Emit(month, map)

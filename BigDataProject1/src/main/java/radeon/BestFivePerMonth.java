@@ -1,12 +1,14 @@
-package it.uniroma3.bigdata.radeon.jobs;
+package radeon;
 
-import it.uniroma3.bigdata.radeon.data.ProductWritable;
-import it.uniroma3.bigdata.radeon.data.ProductWritableList;
-import it.uniroma3.bigdata.radeon.mappers.BestFivePerMonthMapper;
-import it.uniroma3.bigdata.radeon.reducers.BestFivePerMonthReducer;
+import radeon.data.ProductArrayWritable;
+import radeon.data.ProductWritable;
+import radeon.data.ProductWritableList;
+import radeon.mappers.BestFivePerMonthMapper;
+import radeon.reducers.BestFivePerMonthReducer;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.ArrayWritable;
 import org.apache.hadoop.io.FloatWritable;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
@@ -19,7 +21,7 @@ public class BestFivePerMonth {
 
 	public static void main(String[] args) throws Exception {
 		
-		//Probabilmente la specifica che il singolo record è una linea è contenuta nell'oggetto Configuration di default
+		//Probabilmente la specifica che il singolo record ï¿½ una linea ï¿½ contenuta nell'oggetto Configuration di default
 		Job job = new Job(new Configuration(), "BestFivePerMonth");
 
 		job.setJarByClass(BestFivePerMonth.class);
@@ -34,7 +36,7 @@ public class BestFivePerMonth {
 		job.setMapOutputKeyClass(Text.class);
 		job.setMapOutputValueClass(ProductWritable.class);
 		job.setOutputKeyClass(Text.class);
-		job.setOutputValueClass(ProductWritableList.class);
+		job.setOutputValueClass(ProductArrayWritable.class);
 		job.setOutputFormatClass(TextOutputFormat.class);
 
 		job.waitForCompletion(true);

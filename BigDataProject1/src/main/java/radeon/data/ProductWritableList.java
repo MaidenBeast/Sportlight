@@ -1,4 +1,4 @@
-package it.uniroma3.bigdata.radeon.data;
+package radeon.data;
 
 import java.io.DataInput;
 import java.io.DataOutput;

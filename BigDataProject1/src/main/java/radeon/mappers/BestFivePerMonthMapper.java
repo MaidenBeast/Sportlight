@@ -1,6 +1,4 @@
-package it.uniroma3.bigdata.radeon.mappers;
-
-import it.uniroma3.bigdata.radeon.data.ProductWritable;
+package radeon.mappers;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -11,6 +9,8 @@ import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
+
+import radeon.data.ProductWritable;
 
 
 public class BestFivePerMonthMapper extends
@@ -30,7 +30,7 @@ public class BestFivePerMonthMapper extends
 		
 		Text writeMonth = new Text(month);
 		for (String prod : products) {
-			context.write(writeMonth, new ProductWritable(prod, 1));
+			context.write(writeMonth, new ProductWritable(new Text(prod), new IntWritable(1)));
 		}
 	}
 	

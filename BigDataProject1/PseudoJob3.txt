@@ -2,10 +2,13 @@ Class FoodAssocWritable
 	- foodThis		:Text
 	- foodOthers	:TextArrayWritable
 
-Creare in qualche modo le seguenti variabili "globali":
-	- numeri di scontrini totali (IntWritable); <-- "scontrini"
-	- mappa (cibo -> n° scontrini) <Text, IntWritable>, che indica per ogni cibo
-	  in quanti scontrini è presente <-- "foodNumberMap"
+Creare i seguenti gruppi di Counter 
+https://hadoop.apache.org/docs/r2.6.3/api/org/apache/hadoop/mapred/Counters.html
+	- per gli scontrini totali: context.getCounter("totale", "contatore")
+	- per ogni tipo di cibo: context.getCounter("cibi", "<nome cibo>")
+
+Per maggiori info:
+https://hadoop.apache.org/docs/r2.5.2/api/org/apache/hadoop/mapreduce/TaskAttemptContext.html#getCounter(java.lang.String,%20java.lang.String)
 
 //Per ogni "uova,latte,pane,vino" emetti ogni possibile coppia di cibi
 //uova -> latte, uova -> pane, uova -> vino
@@ -18,13 +21,10 @@ map(key, row)
 	foodAssocs[] = generateFoodAssocs(row);
 	
 	foreach foodAssoc in foodAssocs
-		scontrini++;
-		foodNumber = foodNumberMap.get(foodAssoc.getFoodThis())
-		
-		if foodNumber == NIL
-			foodNumberMap.push(foodAssoc.getFoodThis(), 1)
-		foodNumber++
+		incCounter("totale", "contatore") //incremento il numero totale di scontrini
+		incCounter("cibi", foodAssoc.getFoodThis()) //incremento il numero di scontrini per cibo
 		
 		foreach foodOthers in foodAssoc.getFoodOthers()
 			Emit(foodAssoc.getFoodThis(), foodOthers) //emetti (k: foodThis, v: foodOther corrente) 
-		
+
+reduce(		

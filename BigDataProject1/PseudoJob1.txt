@@ -11,23 +11,25 @@ map(key, row)
 	foreach product in products
 		Emit(month, new ProductEntry(product, 1))
 	
-reduce2(month, productEntries[])
+reduce(month, productEntries[])
 	map = initMap(); //key: productName; value: productEntry object
 	foreach entry in productEntries
 		productName = entry.getName()
 		product = map.get(productName)
 		
-		if (product == NIL)  //Se non esiste una entry con il nome attualmente esaminato
-			product = new ProductEntry()
-			map.push(productName, product)
-		else
+		if (product != NIL)
 			oldSum = product.getSum()
 			newSum = oldSum + entry.getSum()
+			product.setSum(newSum)
+		else
+			product = new ProductEntry()
+			product.setSum(1)
+			map.push(productName, product)	
 	
 	//A questo punto abbiamo i conteggi di tutti i prodotti contenuti nell'array productEntries per il mese corrente
 	productAndSums = map.getArray()
 	productAndSums.sort(compareBySum) //Comparatore per sum come parametro
 	
-	productAndSums.filter(5) //Filtra i primi 5 prodotti più venduti per il mese considerato
+	productAndSums.filter(5) //Filtra i primi 5 prodotti piï¿½ venduti per il mese considerato
 	
 	Emit(month, productAndSums) 

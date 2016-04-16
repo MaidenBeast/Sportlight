@@ -1,9 +1,41 @@
-//https://stackoverflow.com/questions/16222205/use-global-variable-in-reudcer-class
-//usare metodo setup per leggere i dati da file esterno
-//e creare configurazione per impostare il prezzo dei prodotti
+Creare file di configurazione dei prezzi per ciascun cibo
+Utilizzare l'oggetto Configuration di Hadoop
+
+Class MonthEntry
+	- month	:String;
+	- sum	:Integer;
+	
+	getters e setters...
 
 map(key, row)
-//emit per [mese, 1]?
+	month = getMonth(row)
+	products = splitProducts(row)
+	foreach product in products
+		Emit(product, new MonthEntry(month, 1))
 
-reduce(month, monthEntries[])
+reduce(product, monthEntries[])
+	map = initMap();
 	
+	monthNumber = 1;
+	
+	while (monthNumber <= 12)
+		map.push("2015-"+monthNumber, new MonthEntry("2015-"+monthNumber, 0))
+	
+	foreach entry in monthEntries
+		monthNumber = entry.getMonth()
+		month = map.get(monthNumber)
+		
+		if (month != NIL)
+			oldSum = month.getSum()
+			newSum = oldSum + getSingleCost(product)
+			month.setSum(newSum)
+		else //in teoria l'else non dovrebbe essere mai raggiunto
+			month = new MonthEntry()
+			month.setSum(getCost(entry))
+			map.push(monthName, month)	
+	
+	//A questo punto abbiamo i conteggi di tutti i mesi contenuti nell'array monthEntries per il prodotto corrente
+	monthAndSums = map.getArray()
+	
+	
+	Emit(product, monthAndSums)

@@ -52,17 +52,19 @@ public class BestFivePerMonthReducer extends
 		System.out.println();*/
 		
 		Arrays.sort(products, Collections.reverseOrder()); //sort in ordine decrescente
-		Writable[] best5 = Arrays.copyOf(products, 5);
+		
+		if (products.length>5)
+			products = Arrays.copyOf(products, 5);
 		
 		//debug su log
 		System.out.print(key.toString()+" ");
-		for (Writable w : best5) {
+		for (Writable w : products) {
 			System.out.print(w.toString()+ " ");
 		}
 		System.out.println();
 		
 		ProductArrayWritable writeBest5 = new ProductArrayWritable();
-		writeBest5.set(best5);
+		writeBest5.set(products);
 		
 		context.write(key, writeBest5);
 	}

@@ -27,4 +27,5 @@ map(key, row)
 		foreach foodOthers in foodAssoc.getFoodOthers()
 			Emit(foodAssoc.getFoodThis(), foodOthers) //emetti (k: foodThis, v: foodOther corrente) 
 
-reduce(		
+reduce(leftFood, rightFood)
+	//chiedere delucidazioni a Luca riguardo il punto (ii)		

@@ -1,6 +1,19 @@
 Class FoodAssocWritable
-	- foodThis		:Text
-	- foodOthers	:TextArrayWritable
+	- thisFood				:Text
+	- otherFoods			:TextArrayWritable
+	
+Class FoodPairWritable
+	- leftFood				:Text
+	- rightFood				:Text
+	
+In FoodPairWritable bisogna per forza implementare hashCode
+ATTENZIONE: bisogna evitare che l'hashCode renda uguali i seguenti due casi:
+	- FoodPairWritable("pane", "vino")
+	- FoodPairWritable("vino", "pane")
+	
+Class PercentagePairWritable
+	- supportPercentage		:Text (nel formato %d\\%)
+	- confidencePercentage	:Text (nel formato %d\\%)
 
 Creare i seguenti gruppi di Counter 
 https://hadoop.apache.org/docs/r2.6.3/api/org/apache/hadoop/mapred/Counters.html
@@ -22,10 +35,25 @@ map(key, row)
 	
 	foreach foodAssoc in foodAssocs
 		incCounter("totale", "contatore") //incremento il numero totale di scontrini
-		incCounter("cibi", foodAssoc.getFoodThis()) //incremento il numero di scontrini per cibo
+		incCounter("cibi", foodAssoc.getThisFood()) //incremento il numero di scontrini per cibo
 		
-		foreach foodOthers in foodAssoc.getFoodOthers()
-			Emit(foodAssoc.getFoodThis(), foodOthers) //emetti (k: foodThis, v: foodOther corrente) 
+		foreach otherFood in foodAssoc.getOtherFoods()
+			foodPair = new FoodPairWritable(foodAssoc.getThisFood(), foodOther)
+			Emit(foodPair, 1) //emetti (k: foodPair, v: 1)
+			//NO --> Emit(foodAssoc.getFoodThis(), foodOthers) //emetti (k: foodThis, v: foodOther corrente) 
 
-reduce(leftFood, rightFood)
-	//chiedere delucidazioni a Luca riguardo il punto (ii)		
+reduce(foodPair, sums)
+	total = 0
+	
+	foreach sum in sums
+		total += sum
+	
+	//punto (i): n° scontrini con coppia <cibo1, cibo2>/n° scontrini totali
+	supportPercentage = sum/getCounter("totale", "contatore")
+	
+	//punto (ii): n° scontrini con coppia <cibo1, cibo2>/n° scontrini con <cibo1>
+	confidencePercentage =sum/getCounter("cibi", foodPair.get)
+	
+	percentPair = new PercentagePairWritable(supportPercentage, confidencePercentage)
+	Emit(foodPair,percentgePair)
+	

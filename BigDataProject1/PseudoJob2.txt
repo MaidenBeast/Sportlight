@@ -14,7 +14,7 @@ map(key, row)
 		Emit(product, new MonthEntry(month, 1))
 
 reduce(product, monthEntries[])
-	map = initMap();
+	map = initMap(); //key: monthName; value: monthEntry object
 	
 	monthNumber = 1;
 	

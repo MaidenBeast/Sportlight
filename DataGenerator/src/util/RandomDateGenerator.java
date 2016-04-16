@@ -16,7 +16,7 @@ public class RandomDateGenerator {
 
         gc.set(gc.DAY_OF_YEAR, dayOfYear);
 
-        return (gc.get(gc.YEAR) + "-" + gc.get(gc.MONTH) + "-" + gc.get(gc.DAY_OF_MONTH));
+        return (gc.get(gc.YEAR) + "-" + (gc.get(gc.MONTH)+1) + "-" + gc.get(gc.DAY_OF_MONTH));
 
     }
 

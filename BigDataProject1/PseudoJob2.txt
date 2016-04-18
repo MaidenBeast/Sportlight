@@ -1,5 +1,4 @@
 Creare file di configurazione dei prezzi per ciascun cibo
-Utilizzare l'oggetto Configuration di Hadoop
 
 Class MonthEntry
 	- month	:String;
@@ -8,13 +7,14 @@ Class MonthEntry
 	getters e setters...
 
 map(key, row)
+	costs = loadFromFile("costs.properties")
 	month = getMonth(row)
 	products = splitProducts(row)
 	foreach product in products
-		Emit(product, new MonthEntry(month, 1))
+		Emit(product, new MonthEntry(month, costs.getProductCost(product))
 
 reduce(product, monthEntries[])
-	map = initMap();
+	map = initMap(); //key: monthName; value: monthEntry object
 	
 	monthNumber = 1;
 	
@@ -27,11 +27,10 @@ reduce(product, monthEntries[])
 		
 		if (month != NIL)
 			oldSum = month.getSum()
-			newSum = oldSum + getSingleCost(product)
+			newSum = oldSum + entry.getSum()
 			month.setSum(newSum)
-		else //in teoria l'else non dovrebbe essere mai raggiunto
-			month = new MonthEntry()
-			month.setSum(getCost(entry))
+		else //in teoria l'else non dovrebbe essere mai raggiunto, perchè c'è un entry per ogni mese. Codice difensivo
+			month = new MonthEntry("2015-"+monthNumber, entry.getSum())
 			map.push(monthName, month)	
 	
 	//A questo punto abbiamo i conteggi di tutti i mesi contenuti nell'array monthEntries per il prodotto corrente

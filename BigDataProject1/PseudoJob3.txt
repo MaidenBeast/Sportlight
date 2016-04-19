@@ -5,13 +5,14 @@ Class FoodAssocWritable
 Class FoodPairWritable
 	- leftFood				:Text
 	- rightFood				:Text
+	- supportCount          :IntWritable
 	
 In FoodPairWritable bisogna per forza implementare hashCode
 ATTENZIONE: bisogna evitare che l'hashCode renda uguali i seguenti due casi:
 	- FoodPairWritable("pane", "vino")
 	- FoodPairWritable("vino", "pane")
 	
-Class PercentagePairWritable
+Class SupportConfidenceWritable
 	- supportPercentage		:Text (nel formato %d\\%)
 	- confidencePercentage	:Text (nel formato %d\\%)
 

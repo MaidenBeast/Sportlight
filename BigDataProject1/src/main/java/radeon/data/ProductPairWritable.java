@@ -13,12 +13,10 @@ public class ProductPairWritable implements Writable {
 	
 	private Text leftFood;
 	private Text rightFood;
-	private IntWritable supportCount;
 	
 	public ProductPairWritable(Text lf, Text rf) {
 		this.leftFood = lf;
 		this.rightFood = rf;
-		this.supportCount = new IntWritable(0);
 	}
 	
 	public Text getLeftFood() {
@@ -35,23 +33,6 @@ public class ProductPairWritable implements Writable {
 
 	public void setRightFood(Text rightFood) {
 		this.rightFood = rightFood;
-	}
-
-	public IntWritable getSupportCount() {
-		return supportCount;
-	}
-	
-	public int getSupportCountAsInt() {
-		return supportCount.get();
-	}
-
-	public void setSupportCount(IntWritable supportCount) {
-		this.supportCount = supportCount;
-	}
-
-	public void increaseCount() {
-		int newVal = this.getSupportCountAsInt() + 1;
-		this.supportCount = new IntWritable(newVal);
 	}
 	
 	@Override

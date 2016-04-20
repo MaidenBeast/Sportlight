@@ -44,5 +44,8 @@ public class PercentagesWritable implements Writable {
 		this.support.write(out);
 		this.confidence.write(out);
 	}
-
+	
+	public String toString() {
+		return this.support + "%, " + this.confidence + "%";
+	}
 }

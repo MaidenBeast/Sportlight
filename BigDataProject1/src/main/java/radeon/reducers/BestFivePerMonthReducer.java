@@ -33,7 +33,7 @@ public class BestFivePerMonthReducer extends
 			
 			if (map.containsKey(prodName)) {
 				trackedProd = map.get(prodName);
-				int newCount = trackedProd.getCount().get() + 1;
+				int newCount = trackedProd.getCountAsInt() + 1;
 				trackedProd.setCount(new IntWritable(newCount));
 			}
 			else {

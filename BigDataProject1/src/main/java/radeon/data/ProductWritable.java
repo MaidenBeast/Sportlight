@@ -35,6 +35,10 @@ public class ProductWritable implements Writable, WritableComparable<ProductWrit
 	public IntWritable getCount() {
 		return count;
 	}
+	
+	public int getCountAsInt() {
+		return count.get();
+	}
 
 	public void setCount(IntWritable count) {
 		this.count = count;

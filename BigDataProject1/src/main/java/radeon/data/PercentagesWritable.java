@@ -17,6 +17,22 @@ public class PercentagesWritable implements Writable {
 		this.confidence = confidence;
 	}
 	
+	public DoubleWritable getSupport() {
+		return support;
+	}
+
+	public void setSupport(DoubleWritable support) {
+		this.support = support;
+	}
+
+	public DoubleWritable getConfidence() {
+		return confidence;
+	}
+
+	public void setConfidence(DoubleWritable confidence) {
+		this.confidence = confidence;
+	}
+
 	@Override
 	public void readFields(DataInput in) throws IOException {
 		this.support.readFields(in);

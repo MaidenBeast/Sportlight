@@ -29,7 +29,7 @@ public class RevenuesReducer extends
 	public void reduce(Text key, Iterable<MonthWritable> values,
 			Context context) throws IOException, InterruptedException {
 		
-		this.prepareCosts("costs.properties");
+		this.prepareCosts("d:/Hadoop/hadoop-2.7.1/jars/costs.properties");
 //		Properties costs = new Properties();
 //		costs.load(new FileInputStream("costs.properties"));
 		Map<String, MonthWritable> monthlyRevs = new HashMap<>();

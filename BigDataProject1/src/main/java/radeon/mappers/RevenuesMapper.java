@@ -26,7 +26,7 @@ public class RevenuesMapper extends
 	
 	public void map(LongWritable key, Text value, Context context)
 			throws IOException, InterruptedException {
-		Properties costs = this.prepareCosts("costs.properties");
+		Properties costs = this.prepareCosts("d:/Hadoop/hadoop-2.7.1/jars/costs.properties");
 //		Properties costs = new Properties();
 //		costs.load(new FileInputStream("costs.properties"));
 

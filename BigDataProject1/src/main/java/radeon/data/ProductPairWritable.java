@@ -9,14 +9,17 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.io.WritableComparable;
 
-//IMPLEMENTARE IL COSTRUTTORE NO-ARG, se non c'è crea problemi ad Hadoop
-//Questo tipo è usato come chiave, quindi rientra nello shuffle and sort ed è richiesto quindi che implementi WritableComparable.
+//IMPLEMENTARE IL COSTRUTTORE NO-ARG, se non c'ï¿½ crea problemi ad Hadoop
+//Questo tipo ï¿½ usato come chiave, quindi rientra nello shuffle and sort ed ï¿½ richiesto quindi che implementi WritableComparable.
 public class ProductPairWritable implements Writable, WritableComparable<ProductPairWritable> {
 	
 	private Text leftFood;
 	private Text rightFood;
 	
-	public ProductPairWritable() {}
+	public ProductPairWritable() {
+		this.leftFood = new Text();
+		this.rightFood = new Text();
+	}
 	
 	public ProductPairWritable(Text lf, Text rf) {
 		this.leftFood = lf;

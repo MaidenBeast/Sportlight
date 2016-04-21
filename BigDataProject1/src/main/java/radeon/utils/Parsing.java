@@ -17,7 +17,7 @@ public class Parsing {
 	}
 	
 	public static List<String> splitProducts(StringTokenizer tokenizer) {
-		List<String> products = new ArrayList<>();
+		List<String> products = new ArrayList<String>();
 		while (tokenizer.hasMoreTokens()) {
 			products.add(tokenizer.nextToken());
 		}

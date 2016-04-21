@@ -1,30 +1,14 @@
 package radeon.reducers;
 
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
 
-import org.apache.hadoop.io.ArrayWritable;
 import org.apache.hadoop.io.DoubleWritable;
-import org.apache.hadoop.io.FloatWritable;
 import org.apache.hadoop.io.IntWritable;
-import org.apache.hadoop.io.Text;
-import org.apache.hadoop.io.Writable;
+import org.apache.hadoop.mapred.Counters.Counter;
 import org.apache.hadoop.mapreduce.Reducer;
 
-import radeon.data.MonthArrayWritable;
-import radeon.data.MonthWritable;
 import radeon.data.PercentagesWritable;
-import radeon.data.ProductArrayWritable;
 import radeon.data.ProductPairWritable;
-import radeon.data.ProductWritable;
-import radeon.data.ProductWritableList;
 
 public class SupportConfidenceReducer extends
 		Reducer<ProductPairWritable, IntWritable, ProductPairWritable, PercentagesWritable> {
@@ -38,10 +22,14 @@ public class SupportConfidenceReducer extends
 			coveredBills += 1.0;
 		}
 		
-		double support = coveredBills/context.getCounter("TOTALS", "BILLS_COUNTER").getValue();
+		Counter billCounter = (Counter) context.getCounter("TOTALS", "BILLS_COUNTER");
+		double support = coveredBills/billCounter.getValue();
+		//double support = coveredBills/context.getCounter("TOTALS", "BILLS_COUNTER").getValue();
 		
 		String leftFood = key.getLeftFood().toString();
-		double confidence = coveredBills/context.getCounter("TOTALS", "BILLS_WITH_" + leftFood.toUpperCase()).getValue();
+		Counter billProductCounter = (Counter)context.getCounter("TOTALS", "BILLS_WITH_" + leftFood.toUpperCase());
+		double confidence = coveredBills/billProductCounter.getValue();
+		//double confidence = coveredBills/context.getCounter("TOTALS", "BILLS_WITH_" + leftFood.toUpperCase()).getValue();
 		
 		PercentagesWritable result = new PercentagesWritable(new DoubleWritable(support), new DoubleWritable(confidence));
 		context.write(key, result);	

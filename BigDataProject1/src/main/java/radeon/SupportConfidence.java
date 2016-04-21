@@ -1,29 +1,17 @@
 package radeon;
 
-import radeon.data.MonthArrayWritable;
-import radeon.data.MonthWritable;
-import radeon.data.PercentagesWritable;
-import radeon.data.ProductArrayWritable;
-import radeon.data.ProductPairWritable;
-import radeon.data.ProductWritable;
-import radeon.data.ProductWritableList;
-import radeon.mappers.BestFivePerMonthMapper;
-import radeon.mappers.RevenuesMapper;
-import radeon.mappers.SupportConfidenceMapper;
-import radeon.reducers.BestFivePerMonthReducer;
-import radeon.reducers.RevenuesReducer;
-import radeon.reducers.SupportConfidenceReducer;
-
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.ArrayWritable;
-import org.apache.hadoop.io.FloatWritable;
 import org.apache.hadoop.io.IntWritable;
-import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
+
+import radeon.data.PercentagesWritable;
+import radeon.data.ProductPairWritable;
+import radeon.mappers.SupportConfidenceMapper;
+import radeon.reducers.SupportConfidenceReducer;
 
 public class SupportConfidence {
 

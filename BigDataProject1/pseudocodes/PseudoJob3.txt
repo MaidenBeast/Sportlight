@@ -34,8 +34,9 @@ map(key, row)
 	//[uova,[latte,pane,vino]], [latte,[uova,pane,vino]], [pane,[uova, latte,vino]], ecc...
 	foodAssocs[] = generateFoodAssocs(row);
 	
+	incCounter("totale", "contatore") //incremento il numero totale di scontrini
+	
 	foreach foodAssoc in foodAssocs
-		incCounter("totale", "contatore") //incremento il numero totale di scontrini
 		incCounter("cibi", foodAssoc.getThisFood()) //incremento il numero di scontrini per cibo
 		
 		foreach otherFood in foodAssoc.getOtherFoods()

@@ -7,6 +7,7 @@ import java.util.StringTokenizer;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mapred.Counters.Counter;
 import org.apache.hadoop.mapreduce.Mapper;
 
 import radeon.data.ProductPairWritable;
@@ -30,12 +31,21 @@ public class SupportConfidenceMapper extends
 		Set<String> products = Parsing.splitDistinctProducts(st);
 		Set<ProductPairWritable> prodPairs = Writables.generatePairs(products);
 		
-		context.getCounter("TOTALS", "BILLS_COUNTER").increment(1);
+		Counter billCounter = (Counter) context.getCounter("TOTALS", "BILLS_COUNTER");
+		billCounter.increment(1L);
+		//context.getCounter("TOTALS", "BILLS_COUNTER").increment(1);
+		
 		for (String p : products) {
-			context.getCounter("TOTALS", "BILLS_WITH_" + p.toUpperCase()).increment(1);
+			//System.out.print(p + " ");
+			Counter billProductCounter = (Counter) context.getCounter("TOTALS", "BILLS_WITH_" + p.toUpperCase());
+			billProductCounter.increment(1L);
+			//context.getCounter("TOTALS", "BILLS_WITH_" + p.toUpperCase()).increment(1);
 		}
 		
+		//System.out.println();
+		
 		for (ProductPairWritable pair : prodPairs) {
+			System.out.println(pair);
 			context.write(pair, new IntWritable(1));
 		}
 	}

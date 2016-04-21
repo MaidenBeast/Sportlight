@@ -1,17 +1,9 @@
 package radeon.reducers;
 
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 
-import org.apache.hadoop.io.ArrayWritable;
-import org.apache.hadoop.io.FloatWritable;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.Writable;
@@ -19,9 +11,6 @@ import org.apache.hadoop.mapreduce.Reducer;
 
 import radeon.data.MonthArrayWritable;
 import radeon.data.MonthWritable;
-import radeon.data.ProductArrayWritable;
-import radeon.data.ProductWritable;
-import radeon.data.ProductWritableList;
 
 public class RevenuesReducer extends
 		Reducer<Text, MonthWritable, Text, MonthArrayWritable> {
@@ -29,10 +18,7 @@ public class RevenuesReducer extends
 	public void reduce(Text key, Iterable<MonthWritable> values,
 			Context context) throws IOException, InterruptedException {
 		
-		this.prepareCosts("d:/Hadoop/hadoop-2.7.1/jars/costs.properties");
-//		Properties costs = new Properties();
-//		costs.load(new FileInputStream("costs.properties"));
-		Map<String, MonthWritable> monthlyRevs = new HashMap<>();
+		Map<String, MonthWritable> monthlyRevs = new HashMap<String, MonthWritable>();
 		this.prepareRevs(monthlyRevs);
 		for (MonthWritable mw : values) {
 			String monthName = mw.getMonth().toString();
@@ -66,9 +52,4 @@ public class RevenuesReducer extends
 		}
 	}
 	
-	private Properties prepareCosts(String filename) throws IOException {
-		Properties costs = new Properties();
-		costs.load(new FileInputStream(filename));
-		return costs;
-	}
 }

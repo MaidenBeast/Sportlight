@@ -60,8 +60,8 @@ public class SupportConfidence {
 		
 		for (Counter c : cGroup) {
 			conf.setInt("counters.totals."+c.getName().toLowerCase(), (int) c.getValue());
-			System.out.println("counters.totals."+c.getName().toLowerCase()
-					+ " = "+conf.getInt("counters.totals."+c.getName().toLowerCase(), 0));
+			/*System.out.println("counters.totals."+c.getName().toLowerCase()
+					+ " = "+conf.getInt("counters.totals."+c.getName().toLowerCase(), 0));*/
 		}
 		
 		/*for (CounterGroup group : counters) {

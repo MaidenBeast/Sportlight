@@ -27,7 +27,7 @@ public class BestFivePerMonthReducer extends
 		Map<String, ProductWritable> map = new HashMap<String, ProductWritable>();
 		for (ProductWritable pw : values) {
 			String prodName = pw.getName().toString();
-			System.out.println(key.toString()+" "+pw.toString());
+			//System.out.println(key.toString()+" "+pw.toString());
 			
 			ProductWritable trackedProd = null;
 			
@@ -57,11 +57,11 @@ public class BestFivePerMonthReducer extends
 			products = Arrays.copyOf(products, 5);
 		
 		//debug su log
-		System.out.print(key.toString()+" ");
+		/*System.out.print(key.toString()+" ");
 		for (Writable w : products) {
 			System.out.print(w.toString()+ " ");
 		}
-		System.out.println();
+		System.out.println();*/
 		
 		ProductArrayWritable writeBest5 = new ProductArrayWritable();
 		writeBest5.set(products);

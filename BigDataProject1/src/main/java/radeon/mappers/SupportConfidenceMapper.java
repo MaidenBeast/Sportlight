@@ -47,7 +47,7 @@ public class SupportConfidenceMapper extends
 		//System.out.println();
 		
 		for (ProductPairWritable pair : prodPairs) {
-			System.out.println(pair);
+			//System.out.println(pair);
 			context.write(pair, new IntWritable(1));
 		}
 	}

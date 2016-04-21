@@ -31,10 +31,12 @@ Mapper<LongWritable, Text, ProductPairWritable, PercentagesWritable> {
 
 		ProductPairCountWritable ppw = Parsing.getPairCount(st);
 		
-		int totalBills = conf.getInt("counter.totals.bills_counter", 0);
+		int totalBills = conf.getInt("counters.totals.bills_counter", 0);
+		System.out.println("counters.totals.bills_counter = "+totalBills);
 		double support = (double)ppw.getSupportCount().get()/totalBills;
 		
-		int billByProduct = conf.getInt("counter.totals.bills_with_"+ppw.getProductPair().getLeftFood(), 0);
+		int billByProduct = conf.getInt("counters.totals.bills_with_"+ppw.getProductPair().getLeftFood(), 0);
+		System.out.println("counters.totals.bills_with_"+ppw.getProductPair().getLeftFood()+" = "+billByProduct);
 		double confidence = (double)ppw.getSupportCount().get()/billByProduct;
 		
 		PercentagesWritable result = new PercentagesWritable(new DoubleWritable(support), new DoubleWritable(confidence));

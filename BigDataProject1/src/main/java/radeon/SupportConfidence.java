@@ -56,19 +56,21 @@ public class SupportConfidence {
 		}
 
 		Counters counters = job1.getCounters();
-		//CounterGroup cGroup = counters.getGroup("TOTALS");
+		CounterGroup cGroup = counters.getGroup("TOTALS");
 		
-		for (CounterGroup group : counters) {
+		for (Counter c : cGroup) {
+			conf.setInt("counters.totals."+c.getName().toLowerCase(), (int) c.getValue());
+			System.out.println("counters.totals."+c.getName().toLowerCase()
+					+ " = "+conf.getInt("counters.totals."+c.getName().toLowerCase(), 0));
+		}
+		
+		/*for (CounterGroup group : counters) {
 			group = (CounterGroup)group;
 			if (group.getName().equals("TOTAL")) {
 				for (Counter c : group) {
 					conf.setInt("counters.total."+c.getName().toLowerCase(), (int) c.getValue());
 				}
 			}
-		}
-		
-		/*for (Counter c : cGroup) {
-			conf.setInt("counters.total."+c.getName().toLowerCase(), (int) c.getValue());
 		}*/
 
 		Job job2 = new Job(conf, "SupportConfidence2");

@@ -3,6 +3,7 @@ package radeon.data;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
+import java.util.Formatter;
 
 import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.Writable;
@@ -51,6 +52,12 @@ public class PercentagesWritable implements Writable {
 	}
 	
 	public String toString() {
-		return this.support + "%, " + this.confidence + "%";
+		double dblSupport = this.support.get()*100;
+		double dblConfidence = this.confidence.get()*100;
+		
+		String strSupport = String.format("%.2f", dblSupport);
+		String strConfidence = String.format("%.2f", dblConfidence);
+		
+		return strSupport + "%, " + strConfidence + "%";
 	}
 }

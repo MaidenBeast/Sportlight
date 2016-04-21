@@ -11,6 +11,10 @@ import org.apache.commons.cli.ParseException;
 import util.ItemBillingGenerator;
 
 public class BillingMain {
+	
+	//Da usarsi specialmente per Hive, per delimitare gli elementi di un array
+	//Delimitatore di default per l'elenco dei cibi: carattere virgola (,)
+	private final static String FOOD_DELIMITER = "|";
 
 	public static void main(String[] args) throws IOException {
 
@@ -57,7 +61,7 @@ public class BillingMain {
 			}
 
 			if (cmd.hasOption("m")) {
-				maxFood = Integer.parseInt(cmd.getOptionValue("r"));
+				maxFood = Integer.parseInt(cmd.getOptionValue("m"));
 			}
 
 			ItemBillingGenerator IB = new ItemBillingGenerator(foodFile);
@@ -68,7 +72,7 @@ public class BillingMain {
 			 * - il numero massimo di cibi per scontrino (nell'esempio 5)
 			 * - la data viene generata in modo randomico nel formato yyyy-mm-dd
 			 */
-			IB.generate(outputFile, rows, maxFood);
+			IB.generate(outputFile, rows, maxFood, FOOD_DELIMITER);
 		} catch (ParseException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

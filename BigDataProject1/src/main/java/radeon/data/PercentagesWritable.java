@@ -12,6 +12,11 @@ public class PercentagesWritable implements Writable {
 	private DoubleWritable support;
 	private DoubleWritable confidence;
 	
+	public PercentagesWritable() {
+		this.support = new DoubleWritable();
+		this.confidence = new DoubleWritable();
+	}
+	
 	public PercentagesWritable(DoubleWritable support, DoubleWritable confidence) {
 		this.support = support;
 		this.confidence = confidence;

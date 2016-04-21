@@ -6,6 +6,11 @@ import java.util.List;
 import java.util.Set;
 import java.util.StringTokenizer;
 
+import org.apache.hadoop.io.IntWritable;
+import org.apache.hadoop.io.Text;
+
+import radeon.data.ProductPairCountWritable;
+
 public class Parsing {
 	
 	public static String getMonth(String date, String delim) {
@@ -38,6 +43,17 @@ public class Parsing {
 		for(int i = 0; i < toSkip && tokenizer.hasMoreTokens(); i +=1) {
 			tokenizer.nextToken();
 		}
+	}
+	
+	public static ProductPairCountWritable getPairCount(StringTokenizer tokenizer) {
+		String strPair = tokenizer.nextToken();
+		String strCount = tokenizer.nextToken();
+		
+		String[] leftRight = strPair.split(","); 
+		
+		return new ProductPairCountWritable(new Text(leftRight[0]),
+											new Text(leftRight[1]),
+											new IntWritable(Integer.parseInt(strCount)));
 	}
 
 }

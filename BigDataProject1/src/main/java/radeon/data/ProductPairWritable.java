@@ -13,8 +13,8 @@ import org.apache.hadoop.io.WritableComparable;
 //Questo tipo � usato come chiave, quindi rientra nello shuffle and sort ed � richiesto quindi che implementi WritableComparable.
 public class ProductPairWritable implements Writable, WritableComparable<ProductPairWritable> {
 	
-	private Text leftFood;
-	private Text rightFood;
+	protected Text leftFood;
+	protected Text rightFood;
 	
 	public ProductPairWritable() {
 		this.leftFood = new Text();

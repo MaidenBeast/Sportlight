@@ -1,9 +1,11 @@
 package radeon.mappers;
 
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.StringTokenizer;
 
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
@@ -22,6 +24,8 @@ public class SupportConfidenceMapper extends
 	
 	public void map(LongWritable key, Text value, Context context)
 			throws IOException, InterruptedException {
+		Configuration conf = context.getConfiguration();
+		
 		String line = value.toString();
 		StringTokenizer st = new StringTokenizer(line, this.delimiter);
 		
@@ -33,13 +37,11 @@ public class SupportConfidenceMapper extends
 		
 		Counter billCounter = (Counter) context.getCounter("TOTALS", "BILLS_COUNTER");
 		billCounter.increment(1L);
-		//context.getCounter("TOTALS", "BILLS_COUNTER").increment(1);
 		
 		for (String p : products) {
-			//System.out.print(p + " ");
+			//System.out.print(p + " ");	
 			Counter billProductCounter = (Counter) context.getCounter("TOTALS", "BILLS_WITH_" + p.toUpperCase());
 			billProductCounter.increment(1L);
-			//context.getCounter("TOTALS", "BILLS_WITH_" + p.toUpperCase()).increment(1);
 		}
 		
 		//System.out.println();

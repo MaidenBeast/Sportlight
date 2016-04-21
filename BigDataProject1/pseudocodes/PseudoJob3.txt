@@ -28,7 +28,7 @@ https://hadoop.apache.org/docs/r2.5.2/api/org/apache/hadoop/mapreduce/TaskAttemp
 //uova -> latte, uova -> pane, uova -> vino
 //latte -> uova, latte -> pane, latte -> vino
 //ecc...
-map(key, row)
+map1(key, row)
 	//esempio pairs[]: a partire da "uova,latte,pane,vino" verrebbe generato il
 	//seguente array:
 	//[uova,[latte,pane,vino]], [latte,[uova,pane,vino]], [pane,[uova, latte,vino]], ecc...
@@ -44,18 +44,29 @@ map(key, row)
 			Emit(foodPair, 1) //emetti (k: foodPair, v: 1)
 			//NO --> Emit(foodAssoc.getFoodThis(), foodOthers) //emetti (k: foodThis, v: foodOther corrente) 
 
-reduce(foodPair, sums)
+reduce1(foodPair, sums)
 	total = 0
 	
 	foreach sum in sums
 		total += sum
 	
+	Emit(foodPair,total)
+
+//nella classe driver poi impostare delle configurazioni counter a partire dai Counter di output stessi
+	
+map2(key, row)
+	foodPair = getFirstField(row)
+	total = getSecondField(row)
+	
 	//punto (i): n° scontrini con coppia <cibo1, cibo2>/n° scontrini totali
-	supportPercentage = sum/getCounter("totale", "contatore")
+	supportPercentage = total/getCounter("totale", "contatore")
 	
 	//punto (ii): n° scontrini con coppia <cibo1, cibo2>/n° scontrini con <cibo1>
-	confidencePercentage =sum/getCounter("cibi", foodPair.get)
+	confidencePercentage =totale/getCounter("cibi", foodPair.getLeftFood)
 	
 	percentPair = new PercentagePairWritable(supportPercentage, confidencePercentage)
-	Emit(foodPair,percentgePair)
+	Emit(foodPair,percentagePair)
+	
+reduce2(foodPair, percentagePair)
+	//usare la IdentityReducer delle API di Hadoop, essendo la reducer inutile
 	

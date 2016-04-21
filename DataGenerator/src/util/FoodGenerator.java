@@ -11,6 +11,7 @@ import java.util.Random;
 public class FoodGenerator {
 	
 	private ArrayList<String> foods;
+	private String foodDelimiter = ",";
 	
 	public FoodGenerator(String fileName) throws IOException{
 		this.foods = new ArrayList<String>();
@@ -25,8 +26,7 @@ public class FoodGenerator {
 			} catch (IOException ioException) {
 				ioException.printStackTrace();
 			}
-		}	
-		
+		}
 	}
 	
 	public String getSingleFood(){
@@ -41,9 +41,13 @@ public class FoodGenerator {
 		for (int i = 0; i<n; i++)	
 			hs.add(getSingleFood());
 		for (String text: hs)
-             multiple_foods = multiple_foods + "," + text;
+             multiple_foods = multiple_foods + text + this.foodDelimiter;
 
         return multiple_foods;
+	}
+	
+	public void setDelimiter(String delim) {
+		this.foodDelimiter = delim;
 	}
 
 }

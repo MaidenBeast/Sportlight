@@ -1,11 +1,6 @@
 package radeon.mappers;
 
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Properties;
 import java.util.Set;
 import java.util.StringTokenizer;
 
@@ -14,12 +9,9 @@ import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
 
-import radeon.data.MonthWritable;
 import radeon.data.ProductPairWritable;
-import radeon.data.ProductWritable;
 import radeon.utils.Parsing;
 import radeon.utils.Writables;
-import radeon.utils.counters.Totals;
 
 
 public class SupportConfidenceMapper extends

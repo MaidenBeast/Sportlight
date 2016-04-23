@@ -42,8 +42,9 @@ public class FoodGenerator {
 			hs.add(getSingleFood());
 		for (String text: hs)
              multiple_foods = multiple_foods + text + this.foodDelimiter;
-
-        return multiple_foods;
+		
+		//Forzatura: cancella la virgola alla fine
+        return multiple_foods.substring(0, multiple_foods.length() - 1);
 	}
 	
 	public void setDelimiter(String delim) {

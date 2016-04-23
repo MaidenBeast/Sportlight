@@ -6,3 +6,10 @@ pesce
 insalata
 formaggio
 dolce
+pasta
+prosciutto
+cocaCola
+burro
+patatine
+salsicce
+fagioli

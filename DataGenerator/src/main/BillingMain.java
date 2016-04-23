@@ -14,7 +14,6 @@ public class BillingMain {
 	
 	//Da usarsi specialmente per Hive, per delimitare gli elementi di un array
 	//Delimitatore di default per l'elenco dei cibi: carattere virgola (,)
-	private final static String HIVE_FOOD_DELIMITER = "|";
 	private final static String FOOD_DELIMITER = ",";
 
 	public static void main(String[] args) throws IOException {

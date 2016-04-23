@@ -36,7 +36,7 @@ public class Revenues {
 				+UserGroupInformation.getCurrentUser().getUserName()+
 				"/input/costs.properties");*/
 		
-		Properties costs = Revenues.prepareCosts("input/costs.properties", conf);
+		Properties costs = Revenues.prepareCosts("/input/costs.properties", conf);
 		
 		for (Entry<Object, Object> entry : costs.entrySet()) {
 			String propName = (String)entry.getKey();

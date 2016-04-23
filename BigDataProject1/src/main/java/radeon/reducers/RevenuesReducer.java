@@ -3,6 +3,7 @@ package radeon.reducers;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeMap;
 
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
@@ -11,6 +12,7 @@ import org.apache.hadoop.mapreduce.Reducer;
 
 import radeon.data.MonthArrayWritable;
 import radeon.data.MonthWritable;
+import radeon.utils.MonthComparator;
 
 public class RevenuesReducer extends
 		Reducer<Text, MonthWritable, Text, MonthArrayWritable> {
@@ -18,7 +20,7 @@ public class RevenuesReducer extends
 	public void reduce(Text key, Iterable<MonthWritable> values,
 			Context context) throws IOException, InterruptedException {
 		
-		Map<String, MonthWritable> monthlyRevs = new HashMap<String, MonthWritable>();
+		Map<String, MonthWritable> monthlyRevs = new TreeMap<String, MonthWritable>(new MonthComparator("-"));
 		this.prepareRevs(monthlyRevs);
 		for (MonthWritable mw : values) {
 			String monthName = mw.getMonth().toString();

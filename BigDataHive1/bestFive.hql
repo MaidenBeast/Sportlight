@@ -1,5 +1,10 @@
 add jar ./brickhouse-0.7.1.jar;
 create temporary function collect as 'brickhouse.udf.collect.CollectUDAF';
+create temporary function truncate_array as 'brickhouse.udf.collect.TruncateArrayUDF';
+create temporary function map_filter_keys as 'brickhouse.udf.collect.MapFilterKeysUDF';
+
+add jar ./BestFiveMapUDF-0.0.1-SNAPSHOT.jar;
+create temporary function best_five_map as 'radeon.BestFiveMapUDF';
 
 add jar ./BigDataHiveSerDe1-0.0.1-SNAPSHOT.jar;
 
@@ -30,13 +35,9 @@ SELECT my_month, product, count(1) as prodCount
 CREATE TABLE prodMonthCount2 AS
 SELECT 	prodMonthCount.my_month as monthProd,
 		collect(prodMonthCount.product, prodMonthCount.prodCount) pcm,
-		collect(prodMonthCount.product) pca
+		truncate_array(collect(prodMonthCount.product),5) pca
 	FROM prodMonthCount
 GROUP BY prodMonthCount.my_month;
 
-SELECT monthProd, map(	pca[0], pcm[pca[0]],
-						pca[1], pcm[pca[1]],
-						pca[2], pcm[pca[2]],
-						pca[3], pcm[pca[3]],
-						pca[4], pcm[pca[4]]) as prodMonthMap
+SELECT monthProd, best_five_map(map_filter_keys(pcm, pca))
 FROM prodMonthCount2;

@@ -32,7 +32,7 @@ public class Revenues {
 
 	public static void main(String[] args) throws Exception {
 		Configuration conf = new Configuration();
-		Properties costs = Revenues.prepareCosts("hdfs://user/"
+		Properties costs = Revenues.prepareCosts("/user/"
 				+UserGroupInformation.getCurrentUser().getUserName()+
 				"/input/costs.properties", conf);
 		

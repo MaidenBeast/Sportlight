@@ -32,11 +32,11 @@ public class Revenues {
 
 	public static void main(String[] args) throws Exception {
 		Configuration conf = new Configuration();
-		/*Properties costs = Revenues.prepareCosts("hdfs://user/"
+		Properties costs = Revenues.prepareCosts("hdfs://user/"
 				+UserGroupInformation.getCurrentUser().getUserName()+
-				"/input/costs.properties");*/
+				"/input/costs.properties", conf);
 		
-		Properties costs = Revenues.prepareCosts("/input/costs.properties", conf);
+		//Properties costs = Revenues.prepareCosts("/input/costs.properties", conf);
 		
 		for (Entry<Object, Object> entry : costs.entrySet()) {
 			String propName = (String)entry.getKey();

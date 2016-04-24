@@ -1,6 +1,7 @@
 package radeon;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.IntWritable;
@@ -21,9 +22,10 @@ import radeon.reducers.SupportConfidenceReducer;
 
 public class SupportConfidence {
 
+	@SuppressWarnings("deprecation")
 	public static void main(String[] args) throws Exception {
 		Path input = new Path(args[0]);
-		Path temp = new Path("temp");
+		Path temp = new Path("/temp");
 		Path output = new Path(args[1]);
 
 		Configuration conf = new Configuration();
@@ -93,5 +95,9 @@ public class SupportConfidence {
 			System.out.println("Job2 failed, exiting");
 			System.exit(-1);
 		}
+		
+		//Pulisci la cartella temp per permettere esecuzioni future
+		FileSystem fs = FileSystem.get(conf);
+		fs.delete(temp);
 	}
 }

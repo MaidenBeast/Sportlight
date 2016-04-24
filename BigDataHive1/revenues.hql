@@ -4,17 +4,25 @@ create temporary function truncate_array as 'brickhouse.udf.collect.TruncateArra
 create temporary function map_filter_keys as 'brickhouse.udf.collect.MapFilterKeysUDF';
 
 add jar ./BigDataHiveUDF1-0.0.1-SNAPSHOT.jar;
-create temporary function best_five_map as 'radeon.BestFiveMapUDF';
+create temporary function sort_map as 'radeon.SortMapByKeyUDF';
 
 add jar ./BigDataHiveSerDe1-0.0.1-SNAPSHOT.jar;
 
 DROP TABLE IF EXISTS bills;
+DROP TABLE IF EXISTS costs;
 
 CREATE TABLE IF NOT EXISTS bills (my_date STRING, products ARRAY<STRING>)
 ROW FORMAT SERDE 'radeon.BillSerDe';
 
 LOAD DATA INPATH 'hiveInput/example.txt'
 OVERWRITE INTO TABLE bills;
+
+CREATE TABLE IF NOT EXISTS prices (product STRING, price INT)
+ROW FORMAT DELIMITED
+        FIELDS TERMINATED BY '=';
+
+LOAD DATA INPATH 'hiveInput/costs.properties'
+OVERWRITE INTO TABLE prices;
 
 DROP TABLE IF EXISTS prodMonth;
 DROP TABLE IF EXISTS prodMonthCount;
@@ -30,14 +38,13 @@ CREATE TABLE prodMonthCount AS
 SELECT my_month, product, count(1) as prodCount
 	FROM prodMonth
 	GROUP BY my_month, product
-	ORDER BY my_month, prodCount DESC;
+	ORDER BY my_month;
 
 CREATE TABLE prodMonthCount2 AS
-SELECT 	prodMonthCount.my_month as monthProd,
-		collect(prodMonthCount.product, prodMonthCount.prodCount) pcm,
-		truncate_array(collect(prodMonthCount.product),5) pca
-	FROM prodMonthCount
-GROUP BY prodMonthCount.my_month;
+SELECT 	prodMonthCount.product,
+	sort_map(collect(prodMonthCount.my_month, prodMonthCount.prodCount*prices.price)) pcm
+FROM prodMonthCount, prices
+WHERE prodMonthCount.product = prices.product
+GROUP BY prodMonthCount.product;
 
-SELECT monthProd, best_five_map(map_filter_keys(pcm, pca))
-FROM prodMonthCount2;
+SELECT * FROM prodMonthCount2;

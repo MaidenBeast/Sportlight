@@ -19,6 +19,7 @@ import radeon.data.ProductPairWritable;
 import radeon.mappers.SupportConfidenceMapper;
 import radeon.mappers.SupportConfidenceMapper2;
 import radeon.reducers.SupportConfidenceReducer;
+import radeon.utils.Jobs;
 
 public class SupportConfidence {
 
@@ -51,6 +52,7 @@ public class SupportConfidence {
 		job1.setOutputFormatClass(TextOutputFormat.class);
 
 		boolean succ = job1.waitForCompletion(true);
+		long job1Time = Jobs.getCompletionTime(job1);
 
 		if (!succ) {
 			System.out.println("Job1 failed, exiting");
@@ -91,10 +93,13 @@ public class SupportConfidence {
 		job2.setOutputFormatClass(TextOutputFormat.class);
 
 		succ = job2.waitForCompletion(true);
+		long job2Time = Jobs.getCompletionTime(job2);
 		if (!succ) {
 			System.out.println("Job2 failed, exiting");
 			System.exit(-1);
 		}
+		
+		System.out.println("Tempo impiegato: " + (job1Time + job2Time));
 		
 		//Pulisci la cartella temp per permettere esecuzioni future
 		FileSystem fs = FileSystem.get(conf);

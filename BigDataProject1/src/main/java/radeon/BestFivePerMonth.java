@@ -5,6 +5,7 @@ import radeon.data.ProductWritable;
 import radeon.data.ProductWritableList;
 import radeon.mappers.BestFivePerMonthMapper;
 import radeon.reducers.BestFivePerMonthReducer;
+import radeon.utils.Jobs;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
@@ -40,5 +41,6 @@ public class BestFivePerMonth {
 		job.setOutputFormatClass(TextOutputFormat.class);
 
 		job.waitForCompletion(true);
+		System.out.println("Tempo impiegato: " + Jobs.getCompletionTime(job));
 	}
 }

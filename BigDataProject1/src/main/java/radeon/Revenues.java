@@ -9,6 +9,7 @@ import radeon.mappers.BestFivePerMonthMapper;
 import radeon.mappers.RevenuesMapper;
 import radeon.reducers.BestFivePerMonthReducer;
 import radeon.reducers.RevenuesReducer;
+import radeon.utils.Jobs;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -64,6 +65,7 @@ public class Revenues {
 		job.setOutputFormatClass(TextOutputFormat.class);
 
 		job.waitForCompletion(true);
+		System.out.println("Tempo impiegato: " + Jobs.getCompletionTime(job));
 	}
 	
 	private static Properties prepareCosts(String filename, Configuration conf) throws IOException {

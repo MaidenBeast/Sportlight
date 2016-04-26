@@ -1,0 +1,13 @@
+----------------------------------------------------------------
+Tue Apr 26 11:52:50 CEST 2016:
+Booting Derby version The Apache Software Foundation - Apache Derby - 10.10.2.0 - (1582446): instance a816c00e-0154-51fc-4ff3-00000671a278 
+on database directory /Users/macbook/git/radeon-big-data/BigDataHive1/metastore_db with class loader sun.misc.Launcher$AppClassLoader@11028347 
+Loaded from file:/Users/macbook/hive/lib/derby-10.10.2.0.jar
+java.vendor=Oracle Corporation
+java.runtime.version=1.8.0_65-b17
+user.dir=/Users/macbook/git/radeon-big-data/BigDataHive1
+os.name=Mac OS X
+os.arch=x86_64
+os.version=10.11.4
+derby.system.home=null
+Database Class Loader started - derby.database.classpath=''

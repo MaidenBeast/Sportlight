@@ -2,9 +2,10 @@ add jar ./BigDataHiveSerDe1-0.0.1-SNAPSHOT.jar;
 
 DROP TABLE IF EXISTS bills;
 DROP TABLE IF EXISTS n_bills;
-DROP TABLE IF EXISTS prodMonth;
+DROP TABLE IF EXISTS prodEntry;
 DROP TABLE IF EXISTS prodCount;
 DROP TABLE IF EXISTS prodCoupleCount;
+DROP TABLE IF EXISTS supportConfidence;
 
 CREATE TABLE IF NOT EXISTS bills (my_date STRING, products ARRAY<STRING>)
 ROW FORMAT SERDE 'radeon.BillSerDe';
@@ -16,23 +17,22 @@ CREATE TABLE IF NOT EXISTS n_bills AS
 SELECT count(1) AS num
 FROM bills;
 
-CREATE TABLE prodMonth AS
-SELECT prodMonthArray.my_month as my_month, product
-FROM (SELECT date_format(my_date, "yyyy-MM") AS my_month, products
-	FROM bills) prodMonthArray
-LATERAL VIEW explode(prodMonthArray.products) prodtable AS product;
+CREATE TABLE prodEntry AS
+SELECT my_date, product
+FROM bills
+LATERAL VIEW explode(bills.products) prodtable AS product;
 
 CREATE TABLE prodCount AS
 SELECT product, count(1) AS pCount
-FROM prodMonth
+FROM prodEntry
 GROUP BY product;
 
 CREATE TABLE prodCoupleCount AS
-SELECT left.product AS cLeft, right.product AS cRight, count(1) AS cCount
-FROM prodMonth left, prodMonth right
-WHERE 	left.my_month = right.my_month AND
-		left.product <> right.product
-GROUP BY left.product, right.product;
+SELECT leftPE.product AS cLeft, rightPE.product AS cRight, count(1) AS cCount
+FROM prodEntry leftPE, prodEntry rightPE
+WHERE 	leftPE.my_date = rightPE.my_date AND
+		leftPE.product <> rightPE.product
+GROUP BY leftPE.product, rightPE.product;
 
 CREATE TABLE supportConfidence AS
 SELECT 	cLeft, cRight,

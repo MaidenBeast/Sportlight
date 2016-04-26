@@ -17,6 +17,7 @@ FROM bills;
 
 CREATE TABLE prodEntry AS
 SELECT my_date, product
+FROM bills
 LATERAL VIEW explode(bills.products) prodtable AS product;
 
 CREATE TABLE prodCount AS

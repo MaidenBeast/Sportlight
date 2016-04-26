@@ -4,7 +4,6 @@
 
 package radeon;
 
-import java.util.Arrays;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -26,7 +25,6 @@ public class BestFiveMapUDF extends GenericUDF {
 	public Object evaluate(DeferredObject[] args) throws HiveException {
 		Map<String, Integer> mapInput = (Map<String, Integer>)this.mapInspector.getMap(args[0].get());
 		//Map<String, Integer> mapOutput = (Map<String, Integer>)this.retValInspector.create();
-		Map<String, Integer> mapOutput = new TreeMap<String, Integer>();
 		
 		if (mapInput == null)
 			return null;

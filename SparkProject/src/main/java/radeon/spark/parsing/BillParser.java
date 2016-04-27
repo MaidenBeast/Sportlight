@@ -23,8 +23,21 @@ public class BillParser {
 			singleSales.add(tuple);
 		}
 		
-		return singleSales;
+		return singleSales;	
+	}
+	
+	public List<MonthProductKey> parseBillKeysOnly(String line) {
+		String[] dateAndProducts = line.split(this.delimiter);
+		String month = this.getMonth(dateAndProducts[0], "-");
 		
+		List<MonthProductKey> saleKeys = new ArrayList<>();
+		
+		for (int i = 1; i < dateAndProducts.length; i += 1) {
+			MonthProductKey mpk = new MonthProductKey(month, dateAndProducts[i]);
+			saleKeys.add(mpk);
+		}
+		
+		return saleKeys;
 	}
 	
 	private String getMonth(String date, String sep) {

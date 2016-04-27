@@ -1,7 +1,10 @@
 package radeon.spark.data;
 
-public class MonthProductKey {
+import java.io.Serializable;
+
+public class MonthProductKey implements Serializable {
 	
+	private static final long serialVersionUID = 1L;
 	private String month;
 	private String product;
 	
@@ -26,18 +29,38 @@ public class MonthProductKey {
 		this.product = product;
 	}
 	
+	@Override
 	public int hashCode() {
-		return this.month.hashCode() + this.product.hashCode();
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((month == null) ? 0 : month.hashCode());
+		result = prime * result + ((product == null) ? 0 : product.hashCode());
+		return result;
+	}
+		
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		MonthProductKey other = (MonthProductKey) obj;
+		if (month == null) {
+			if (other.month != null)
+				return false;
+		} else if (!month.equals(other.month))
+			return false;
+		if (product == null) {
+			if (other.product != null)
+				return false;
+		} else if (!product.equals(other.product))
+			return false;
+		return true;
 	}
 	
-	public boolean equals(Object o) {
-		MonthProductKey other = null;
-		try {
-			other = (MonthProductKey) o;
-		}
-		catch (ClassCastException e) {
-			return false;
-		}
-		return other.month.equals(this.month) && other.product.equals(this.product);
+	public String toString() {
+		return this.month + "," + this.product;
 	}
 }

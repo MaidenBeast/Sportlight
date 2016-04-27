@@ -20,6 +20,7 @@ import scala.Tuple2;
 
 public class BestFivePerMonth {
 	
+	@SuppressWarnings("serial")
 	public static void main(String[] args) {
 		String inputPath = args[0];
 		String outputPath = args[1];

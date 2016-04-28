@@ -64,8 +64,13 @@ public class Revenues {
 		job.setOutputValueClass(MonthArrayWritable.class);
 		job.setOutputFormatClass(TextOutputFormat.class);
 
+		long startTime = System.currentTimeMillis();
 		job.waitForCompletion(true);
-		System.out.println("Tempo impiegato: " + Jobs.getCompletionTime(job));
+		
+		System.out.println("Entire job finished in "
+                + (System.currentTimeMillis() - startTime) / 1000.0
+                + " seconds");
+		//System.out.println("Tempo impiegato: " + Jobs.getCompletionTime(job));
 	}
 	
 	private static Properties prepareCosts(String filename, Configuration conf) throws IOException {

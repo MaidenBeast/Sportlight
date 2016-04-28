@@ -51,8 +51,9 @@ public class SupportConfidence {
 		job1.setOutputValueClass(IntWritable.class);
 		job1.setOutputFormatClass(TextOutputFormat.class);
 
+		long startTime = System.currentTimeMillis();
 		boolean succ = job1.waitForCompletion(true);
-		long job1Time = Jobs.getCompletionTime(job1);
+		//long job1Time = Jobs.getCompletionTime(job1);
 
 		if (!succ) {
 			System.out.println("Job1 failed, exiting");
@@ -93,13 +94,17 @@ public class SupportConfidence {
 		job2.setOutputFormatClass(TextOutputFormat.class);
 
 		succ = job2.waitForCompletion(true);
-		long job2Time = Jobs.getCompletionTime(job2);
+		//long job2Time = Jobs.getCompletionTime(job2);
 		if (!succ) {
 			System.out.println("Job2 failed, exiting");
 			System.exit(-1);
 		}
 		
-		System.out.println("Tempo impiegato: " + (job1Time + job2Time));
+		//System.out.println("Tempo impiegato: " + (job1Time + job2Time));
+		
+		System.out.println("Entire job finished in "
+                + (System.currentTimeMillis() - startTime) / 1000.0
+                + " seconds");
 		
 		//Pulisci la cartella temp per permettere esecuzioni future
 		FileSystem fs = FileSystem.get(conf);

@@ -2,6 +2,8 @@ package radeon.spark.data;
 
 import java.io.Serializable;
 
+import scala.Tuple2;
+
 public class MonthProductKey implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
@@ -27,6 +29,14 @@ public class MonthProductKey implements Serializable {
 
 	public void setProduct(String product) {
 		this.product = product;
+	}
+	
+	public Tuple2<String, MonthProductKey> toTupleKeyMonth() {
+		return new Tuple2<>(this.month, this);
+	}
+	
+	public Tuple2<String, MonthProductKey> toTupleKeyProduct() {
+		return new Tuple2<>(this.product, this);
 	}
 	
 	@Override

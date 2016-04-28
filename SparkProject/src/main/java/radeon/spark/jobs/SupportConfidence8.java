@@ -25,7 +25,7 @@ import radeon.spark.utils.ProductPairs;
 import radeon.spark.utils.Products;
 import scala.Tuple2;
 
-public class SupportConfidence {
+public class SupportConfidence8 {
 	
 	public static void main(String[] args) {
 		String inputPath = args[0];

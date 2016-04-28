@@ -1,3 +1,8 @@
+DROP TABLE IF EXISTS start_time;
+
+CREATE TABLE start_time AS
+SELECT unix_timestamp() AS ts;
+
 add jar ./BigDataHiveSerDe1-0.0.1-SNAPSHOT.jar;
 
 DROP TABLE IF EXISTS billInputs;
@@ -54,9 +59,13 @@ DROP TABLE IF EXISTS prodCouple;
 
 CREATE TABLE supportConfidence AS
 SELECT 	cLeft, cRight,
-		(cCount/num)*100 AS support,
-		(cCount/pCount)*100 AS confidence
+		concat(cast(cast((cCount/num)*1000000 as INT)/10000 AS STRING), "%") AS support,
+		concat(cast(cast((cCount/pCount)*1000000 as INT)/10000 AS STRING), "%") AS confidence
 FROM prodCoupleCount, n_bills, prodCount
 WHERE prodCoupleCount.cLeft = prodCount.product;
 
 SELECT * FROM supportConfidence;
+
+SELECT concat("Total execution time: ",
+				cast((unix_timestamp()-st.ts) AS STRING), " secs");
+FROM start_time st;

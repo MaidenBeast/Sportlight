@@ -30,8 +30,9 @@ public class FoodGenerator {
 	}
 	
 	public String getSingleFood(){
-		int index = new Random().nextInt(this.foods.size());
-        String single_food = this.foods.get(index);
+		//int index = new Random().nextInt(this.foods.size());
+		int index = FoodGenerator.getLinearRandomNumber(this.foods.size());
+        String single_food = this.foods.get(index-1);
         return single_food;
 	}
 	
@@ -50,5 +51,24 @@ public class FoodGenerator {
 	public void setDelimiter(String delim) {
 		this.foodDelimiter = delim;
 	}
+	
+	/* Taken from
+	 * https://stackoverflow.com/questions/5969447/java-random-integer-with-non-uniform-distribution
+	 */
+	private static int getLinearRandomNumber(int maxSize){
+        //Get a linearly multiplied random number
+        int randomMultiplier = maxSize * (maxSize + 1) / 2;
+        Random r=new Random();
+        int randomInt = r.nextInt(randomMultiplier);
+
+        //Linearly iterate through the possible values to find the correct one
+        int linearRandomNumber = 0;
+        for(int i=maxSize; randomInt >= 0; i--){
+            randomInt -= i;
+            linearRandomNumber++;
+        }
+
+        return linearRandomNumber;
+    }
 
 }

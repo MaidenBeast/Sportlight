@@ -67,5 +67,5 @@ WHERE prodCoupleCount.cLeft = prodCount.product;
 SELECT * FROM supportConfidence;
 
 SELECT concat("Total execution time: ",
-				cast((unix_timestamp()-st.ts) AS STRING), " secs");
+				cast((unix_timestamp()-st.ts) AS STRING), " secs")
 FROM start_time st;

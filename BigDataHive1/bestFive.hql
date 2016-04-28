@@ -1,3 +1,8 @@
+DROP TABLE IF EXISTS start_time;
+
+CREATE TABLE start_time AS
+SELECT unix_timestamp() AS ts;
+
 add jar ./brickhouse-0.7.1.jar;
 create temporary function collect as 'brickhouse.udf.collect.CollectUDAF';
 create temporary function truncate_array as 'brickhouse.udf.collect.TruncateArrayUDF';
@@ -41,3 +46,7 @@ GROUP BY prodMonthCount.my_month;
 
 SELECT monthProd, best_five_map(map_filter_keys(pcm, pca))
 FROM prodMonthCount2;
+
+SELECT concat("Total execution time: ",
+				cast((unix_timestamp()-st.ts) AS STRING), " secs")
+FROM start_time st;

@@ -1,5 +1,6 @@
 package radeon.spark.parsing;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -9,8 +10,9 @@ import radeon.spark.data.MonthProductKey;
 import radeon.spark.data.ProductPair;
 import scala.Tuple2;
 
-public class BillParser {
+public class BillParser implements Serializable {
 	
+	private static final long serialVersionUID = 1L;
 	private String delimiter = ",";
 	private String dateDelimiter = "-";
 	
@@ -47,7 +49,7 @@ public class BillParser {
 		Set<ProductPair> pairs = new HashSet<>();
 		
 		for (int i = 1; i < dateAndProducts.length; i +=1) {
-			for (int j = 1; i < dateAndProducts.length; j += 1) {
+			for (int j = 1; j < dateAndProducts.length; j += 1) {
 				if (i != j) {
 					String left = dateAndProducts[i];
 					String right = dateAndProducts[j];

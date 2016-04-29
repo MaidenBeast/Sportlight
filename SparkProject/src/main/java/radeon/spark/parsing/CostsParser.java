@@ -1,9 +1,12 @@
 package radeon.spark.parsing;
 
+import java.io.Serializable;
+
 import scala.Tuple2;
 
-public class CostsParser {
+public class CostsParser implements Serializable {
 	
+	private static final long serialVersionUID = 1L;
 	private String delimiter = "=";
 	
 	public Tuple2<String, Integer> parseCosts(String line) {

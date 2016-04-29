@@ -19,6 +19,8 @@ public class SupportConfidence8 {
 		SparkConf conf = new SparkConf().setAppName("SupportConfidence");
 		JavaSparkContext sc = new JavaSparkContext(conf);
 		
+		long startTime = System.currentTimeMillis();
+		
 		JavaRDD<String> bills = sc.textFile(inputPath).cache();
 		int totalBills = (int) bills.count();
 		
@@ -49,6 +51,8 @@ public class SupportConfidence8 {
 				.map(element -> ProductPairs.calculateSupportAndConfidence(element._2()._1(), element._2()._2(), totalBills, element._1()));
 		
 		result.saveAsTextFile(outputPath);
+		double totalTime = (System.currentTimeMillis() - startTime) / 1000.0;
+		System.out.println("Total elapsed time: " + totalTime);
 		sc.close();
 	}
 }

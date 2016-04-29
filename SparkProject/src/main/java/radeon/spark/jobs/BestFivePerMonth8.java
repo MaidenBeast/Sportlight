@@ -23,6 +23,8 @@ public class BestFivePerMonth8 {
 		SparkConf conf = new SparkConf().setAppName("Best five per month");
 		JavaSparkContext sc = new JavaSparkContext(conf);
 		
+		long startTime = System.currentTimeMillis();
+		
 		BillParser parser = new BillParser();
 		JavaPairRDD<MonthProductKey, Integer> allSales =
 				sc.textFile(inputPath)
@@ -38,11 +40,12 @@ public class BestFivePerMonth8 {
 				                      .groupByKey();
 		
 		JavaPairRDD<String, Iterable<ProductReport>> month2BestFive =
-				month2ProductReports.mapToPair(month -> {List<ProductReport> reportList = (List<ProductReport>) month._2();
+				month2ProductReports.mapToPair(month -> {Iterable<ProductReport> reportList = month._2();
 				                                   List<ProductReport> best5 = ProductReports.takeBest(reportList, 5, new ReportComparator());
 				                                   return new Tuple2<>(month._1(), best5);});
-		
 		month2BestFive.saveAsTextFile(outputPath);
+		double totalTime = (System.currentTimeMillis() - startTime) / 1000.0;
+		System.out.println("Total elapsed time: " + totalTime);
 		sc.close();
 	}
 }

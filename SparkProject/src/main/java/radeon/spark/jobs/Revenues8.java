@@ -14,11 +14,13 @@ public class Revenues8 {
 	
 	public static void main(String[] args) {
 		String inputPath = args[0];
-		String costPath = "/costs.properties";
+		String costPath = "costs.properties";
 		String outputPath = args[1];
 		
 		SparkConf conf = new SparkConf().setAppName("Revenues");
 		JavaSparkContext sc = new JavaSparkContext(conf);
+		
+		long startTime = System.currentTimeMillis();
 		
 		//Prepara i costi
 		CostsParser costParser = new CostsParser();
@@ -49,6 +51,8 @@ public class Revenues8 {
 				                    .groupByKey();
 		
 		result.saveAsTextFile(outputPath);
+		double totalTime = (System.currentTimeMillis() - startTime) / 1000.0;
+		System.out.println("Total elapsed time: " + totalTime);
 		sc.close();
 	}
 }

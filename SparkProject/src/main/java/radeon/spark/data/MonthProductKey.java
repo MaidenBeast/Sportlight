@@ -31,6 +31,11 @@ public class MonthProductKey implements Serializable {
 		this.product = product;
 	}
 	
+	public String[] explodeKeys() {
+		String[] keys = {this.month, this.product};
+		return keys;
+	}
+	
 	public Tuple2<String, MonthProductKey> toTupleKeyMonth() {
 		return new Tuple2<>(this.month, this);
 	}

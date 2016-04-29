@@ -12,7 +12,24 @@ public class MonthReport implements Serializable {
 		this.month = month;
 		this.value = value;
 	}
-	
-	
 
+	public String getMonth() {
+		return month;
+	}
+
+	public void setMonth(String month) {
+		this.month = month;
+	}
+
+	public Integer getValue() {
+		return value;
+	}
+
+	public void setValue(Integer value) {
+		this.value = value;
+	}
+	
+	public String toString() {
+		return this.month + ":" + this.value;
+	}
 }

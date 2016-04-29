@@ -1,28 +1,13 @@
 package radeon.spark.jobs;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
-import org.apache.spark.api.java.function.FlatMapFunction;
-import org.apache.spark.api.java.function.Function;
-import org.apache.spark.api.java.function.Function2;
-import org.apache.spark.api.java.function.PairFlatMapFunction;
-import org.apache.spark.api.java.function.PairFunction;
 
-import radeon.spark.data.MonthProductKey;
-import radeon.spark.data.Product;
 import radeon.spark.data.ProductPair;
-import radeon.spark.data.comparators.CountComparator;
-import radeon.spark.functions.IterativeSumFunction;
 import radeon.spark.parsing.BillParser;
-import radeon.spark.parsing.CostsParser;
 import radeon.spark.utils.ProductPairs;
-import radeon.spark.utils.Products;
 import scala.Tuple2;
 
 public class SupportConfidence8 {

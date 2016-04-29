@@ -1,7 +1,6 @@
 package radeon.spark.jobs;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import org.apache.spark.SparkConf;

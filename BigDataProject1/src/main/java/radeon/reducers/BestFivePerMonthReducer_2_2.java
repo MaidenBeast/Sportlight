@@ -19,16 +19,14 @@ import radeon.data.MonthProductKeyWritable;
 import radeon.data.ProductArrayWritable;
 import radeon.data.ProductWritable;
 import radeon.data.ProductWritableList;
+import radeon.utils.Writables;
 
 public class BestFivePerMonthReducer_2_2 extends
-		Reducer<MonthProductKeyWritable, IntWritable, MonthProductKeyWritable, IntWritable> {
+		Reducer<Text, ProductWritable, Text, ProductArrayWritable> {
 
-	public void reduce(MonthProductKeyWritable key, Iterable<IntWritable> values,
+	public void reduce(Text key, Iterable<ProductWritable> values,
 			Context context) throws IOException, InterruptedException {
-		int sum = 0;
-		for (IntWritable one : values) {
-			sum += 1;
-		}
-		context.write(key, new IntWritable(sum));
+		Iterable<ProductWritable> best5 = Writables.takeBest(values, 5);
+		
 	}
 }

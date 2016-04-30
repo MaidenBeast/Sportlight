@@ -1,12 +1,16 @@
 package radeon.utils;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.apache.hadoop.io.Text;
 
 import radeon.data.ProductPairWritable;
+import radeon.data.ProductWritable;
 
 public class Writables {
 		
@@ -26,6 +30,17 @@ public class Writables {
 			}
 		}
 		return pairs;
+	}
+	
+	public static Iterable<ProductWritable> takeBest(Iterable<ProductWritable> products, int n) {
+		List<ProductWritable> prodList = new ArrayList<>();
+		for (ProductWritable prod : products) {
+			prodList.add(prod);
+		}
+		Collections.sort(prodList, Collections.reverseOrder());
+		if (prodList.size() < n)
+			return prodList;
+		return prodList.subList(0, n);
 	}
 
 }

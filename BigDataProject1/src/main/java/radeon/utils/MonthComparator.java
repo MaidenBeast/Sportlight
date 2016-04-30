@@ -6,6 +6,8 @@ public class MonthComparator implements Comparator<String> {
 	
 	private String dateDelimiter = "-";
 	
+	public MonthComparator() {}
+	
 	public MonthComparator(String delim) {
 		this.dateDelimiter = delim;
 	}

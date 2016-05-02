@@ -26,7 +26,11 @@ public class BestFivePerMonthReducer_2_2 extends
 
 	public void reduce(Text key, Iterable<ProductWritable> values,
 			Context context) throws IOException, InterruptedException {
-		Iterable<ProductWritable> best5 = Writables.takeBest(values, 5);
+		List<ProductWritable> best5 = Writables.takeBest(values, 5);
+		ProductWritable[] best5Array = best5.toArray(new ProductWritable[0]);
 		
+		ProductArrayWritable writableArray = new ProductArrayWritable();
+		writableArray.set(best5Array);
+		context.write(key, writableArray);
 	}
 }

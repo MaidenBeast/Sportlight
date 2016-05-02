@@ -32,7 +32,7 @@ public class Writables {
 		return pairs;
 	}
 	
-	public static Iterable<ProductWritable> takeBest(Iterable<ProductWritable> products, int n) {
+	public static List<ProductWritable> takeBest(Iterable<ProductWritable> products, int n) {
 		List<ProductWritable> prodList = new ArrayList<>();
 		for (ProductWritable prod : products) {
 			prodList.add(prod);

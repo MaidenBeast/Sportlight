@@ -64,6 +64,37 @@ public class MonthProductKeyWritable implements Writable, WritableComparable<Mon
         return this.product.compareTo(mpkw.getProduct());
 	}
 	
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((month == null) ? 0 : month.hashCode());
+		result = prime * result + ((product == null) ? 0 : product.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		MonthProductKeyWritable other = (MonthProductKeyWritable) obj;
+		if (month == null) {
+			if (other.month != null)
+				return false;
+		} else if (!month.equals(other.month))
+			return false;
+		if (product == null) {
+			if (other.product != null)
+				return false;
+		} else if (!product.equals(other.product))
+			return false;
+		return true;
+	}
+
 	public String toString() {
 		return this.month.toString() + "," + this.product.toString();
 	}

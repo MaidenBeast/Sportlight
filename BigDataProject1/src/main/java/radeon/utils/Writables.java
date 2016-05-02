@@ -9,6 +9,7 @@ import java.util.Set;
 
 import org.apache.hadoop.io.Text;
 
+import radeon.data.MonthWritable;
 import radeon.data.ProductPairWritable;
 import radeon.data.ProductWritable;
 
@@ -41,6 +42,15 @@ public class Writables {
 		if (prodList.size() < n)
 			return prodList;
 		return prodList.subList(0, n);
+	}
+	
+	public static List<MonthWritable> makeMonthList(Iterable<MonthWritable> months) {
+		List<MonthWritable> monthList = new ArrayList();
+		for (MonthWritable month : months) {
+			monthList.add(month);
+		}
+		Collections.sort(monthList, new MonthWritableComparator());
+		return monthList;
 	}
 
 }

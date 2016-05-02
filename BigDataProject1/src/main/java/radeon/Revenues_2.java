@@ -1,21 +1,25 @@
 package radeon;
 
+import radeon.data.MonthArrayWritable;
 import radeon.data.MonthProductKeyWritable;
-import radeon.data.PercentagesWritable;
+import radeon.data.MonthWritable;
 import radeon.data.ProductArrayWritable;
-import radeon.data.ProductPairWritable;
 import radeon.data.ProductWritable;
 import radeon.data.ProductWritableList;
 import radeon.mappers.BestFivePerMonthMapper;
-import radeon.mappers.BestFivePerMonthMapper_2_1;
-import radeon.mappers.BestFivePerMonthMapper_2_2;
-import radeon.mappers.SupportConfidenceMapper;
-import radeon.mappers.SupportConfidenceMapper2;
+import radeon.mappers.RevenuesMapper;
+import radeon.mappers.RevenuesMapper_1;
+import radeon.mappers.RevenuesMapper_2;
 import radeon.reducers.BestFivePerMonthReducer;
-import radeon.reducers.BestFivePerMonthReducer_2_1;
-import radeon.reducers.BestFivePerMonthReducer_2_2;
-import radeon.reducers.SupportConfidenceReducer;
+import radeon.reducers.RevenuesReducer;
+import radeon.reducers.RevenuesReducer_1;
+import radeon.reducers.RevenuesReducer_2;
 import radeon.utils.Jobs;
+
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.Map.Entry;
+import java.util.Properties;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
@@ -24,33 +28,41 @@ import org.apache.hadoop.io.ArrayWritable;
 import org.apache.hadoop.io.FloatWritable;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.mapreduce.Counter;
-import org.apache.hadoop.mapreduce.CounterGroup;
-import org.apache.hadoop.mapreduce.Counters;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
+import org.apache.hadoop.security.UserGroupInformation;
 
-public class BestFivePerMonth_2 {
+public class Revenues_2 {
 
-	@SuppressWarnings("deprecation")
 	public static void main(String[] args) throws Exception {
 		Path input = new Path(args[0]);
 		Path temp = new Path("/temp");
 		Path output = new Path(args[1]);
-
+		
 		Configuration conf = new Configuration();
-
+		Properties costs = Revenues_2.prepareCosts("/user/"
+				+UserGroupInformation.getCurrentUser().getUserName()+
+				"/input/costs.properties", conf);
+		
+		for (Entry<Object, Object> entry : costs.entrySet()) {
+			String propName = (String)entry.getKey();
+		    String propValue = (String)entry.getValue();
+		    conf.set(propName, propValue);
+		    //System.out.println(propName +" = "+propValue);
+		}
+		
 		//Probabilmente la specifica che il singolo record � una linea � contenuta nell'oggetto Configuration di default
-		Job job1 = new Job(conf, "BestFivePerMonth1");
-
-		job1.setJarByClass(BestFivePerMonth_2.class);
-
-		job1.setMapperClass(BestFivePerMonthMapper_2_1.class);
-		job1.setReducerClass(BestFivePerMonthReducer_2_1.class);
-
+		Job job1 = new Job(conf, "Revenues1");
+		
+		job1.setJarByClass(Revenues_2.class);
+		
+		job1.setMapperClass(RevenuesMapper_1.class);
+		job1.setReducerClass(RevenuesReducer_1.class);
+		
+		//Setta il percorso dei dati di input e quello per i dati di output nell'hdfs
 		FileInputFormat.addInputPath(job1, input);
 		FileOutputFormat.setOutputPath(job1, temp);
 
@@ -61,33 +73,23 @@ public class BestFivePerMonth_2 {
 		job1.setOutputFormatClass(SequenceFileOutputFormat.class);
 
 		long startTime = System.currentTimeMillis();
-		boolean succ = job1.waitForCompletion(true);
-
-		if (!succ) {
-			System.out.println("Job1 failed, exiting");
-			System.exit(-1);
-		}
-
-		Job job2 = new Job(conf, "BestFivePerMonth2");
-
-		job2.setJarByClass(BestFivePerMonth_2.class);
-		job2.setMapperClass(BestFivePerMonthMapper_2_2.class);
-		job2.setReducerClass(BestFivePerMonthReducer_2_2.class);
-
+		job1.waitForCompletion(true);
+		
+		Job job2 = new Job(conf, "Revenues2");
+		
+		job2.setJarByClass(Revenues_2.class);
+		
+		job2.setMapperClass(RevenuesMapper_2.class);
+		job2.setReducerClass(RevenuesReducer_2.class);
+		
 		FileInputFormat.addInputPath(job2, temp);
 		FileOutputFormat.setOutputPath(job2, output);
-
+		
 		job2.setMapOutputKeyClass(Text.class);
-		job2.setMapOutputValueClass(ProductWritable.class);
+		job2.setMapOutputValueClass(MonthWritable.class);
 		job2.setOutputKeyClass(Text.class);
-		job2.setOutputValueClass(ProductArrayWritable.class);
+		job2.setOutputValueClass(MonthArrayWritable.class);
 		job2.setOutputFormatClass(TextOutputFormat.class);
-
-		succ = job2.waitForCompletion(true);
-		if (!succ) {
-			System.out.println("Job2 failed, exiting");
-			System.exit(-1);
-		}
 		
 		System.out.println("Entire job finished in "
                 + (System.currentTimeMillis() - startTime) / 1000.0
@@ -96,5 +98,13 @@ public class BestFivePerMonth_2 {
 		//Pulisci la cartella temp per permettere esecuzioni future
 		FileSystem fs = FileSystem.get(conf);
 		fs.delete(temp);
+	}
+	
+	private static Properties prepareCosts(String filename, Configuration conf) throws IOException {
+		Properties costs = new Properties();
+		FileSystem fs = FileSystem.get(conf);
+		Path p = new Path(filename);
+		costs.load(fs.open(p));
+		return costs;
 	}
 }

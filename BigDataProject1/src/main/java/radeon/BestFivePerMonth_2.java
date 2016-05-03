@@ -29,6 +29,7 @@ import org.apache.hadoop.mapreduce.CounterGroup;
 import org.apache.hadoop.mapreduce.Counters;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
+import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
@@ -69,7 +70,6 @@ public class BestFivePerMonth_2 {
 		}
 
 		Job job2 = new Job(conf, "BestFivePerMonth2");
-
 		job2.setJarByClass(BestFivePerMonth_2.class);
 		job2.setMapperClass(BestFivePerMonthMapper_2_2.class);
 		job2.setReducerClass(BestFivePerMonthReducer_2_2.class);
@@ -77,6 +77,7 @@ public class BestFivePerMonth_2 {
 		FileInputFormat.addInputPath(job2, temp);
 		FileOutputFormat.setOutputPath(job2, output);
 
+		job2.setInputFormatClass(SequenceFileInputFormat.class);
 		job2.setMapOutputKeyClass(Text.class);
 		job2.setMapOutputValueClass(ProductWritable.class);
 		job2.setOutputKeyClass(Text.class);

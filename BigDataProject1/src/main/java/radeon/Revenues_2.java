@@ -30,6 +30,7 @@ import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
+import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
@@ -65,7 +66,7 @@ public class Revenues_2 {
 		//Setta il percorso dei dati di input e quello per i dati di output nell'hdfs
 		FileInputFormat.addInputPath(job1, input);
 		FileOutputFormat.setOutputPath(job1, temp);
-
+		
 		job1.setMapOutputKeyClass(MonthProductKeyWritable.class);
 		job1.setMapOutputValueClass(IntWritable.class);
 		job1.setOutputKeyClass(MonthProductKeyWritable.class);
@@ -85,6 +86,7 @@ public class Revenues_2 {
 		FileInputFormat.addInputPath(job2, temp);
 		FileOutputFormat.setOutputPath(job2, output);
 		
+		job2.setInputFormatClass(SequenceFileInputFormat.class);
 		job2.setMapOutputKeyClass(Text.class);
 		job2.setMapOutputValueClass(MonthWritable.class);
 		job2.setOutputKeyClass(Text.class);

@@ -80,6 +80,12 @@ public class ProductPair implements Serializable {
 	}
 
 	public String toString() {
-		return this.left + "," + this.right + "," + this.support + "%," + this.confidence + "%";
+		double dblSupport = this.support*100;
+		double dblConfidence = this.confidence*100;
+		
+		String strSupport = String.format("%.2f", dblSupport);
+		String strConfidence = String.format("%.2f", dblConfidence);
+		
+		return this.left + "," + this.right + "," + strSupport + "%," + strConfidence + "%";
 	}
 }

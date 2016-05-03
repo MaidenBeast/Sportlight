@@ -11,8 +11,8 @@ public class CostsParser implements Serializable {
 	
 	public Tuple2<String, Integer> parseCosts(String line) {
 		String[] prodCost = line.split(this.delimiter);
-		String product = prodCost[0];
-		String cost = prodCost[1];
+		String product = prodCost[0].trim();
+		String cost = prodCost[1].trim();
 		
 		return new Tuple2<>(product, Integer.parseInt(cost));
 	}

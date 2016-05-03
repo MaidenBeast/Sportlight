@@ -18,7 +18,7 @@ DROP TABLE IF EXISTS bills;
 CREATE TABLE IF NOT EXISTS bills (my_date STRING, products ARRAY<STRING>)
 ROW FORMAT SERDE 'radeon.BillSerDe';
 
-LOAD DATA INPATH 'hiveInput/example.txt'
+LOAD DATA INPATH 'hiveInput/${hiveconf:INPUT}'
 OVERWRITE INTO TABLE bills;
 
 DROP TABLE IF EXISTS prodMonth;

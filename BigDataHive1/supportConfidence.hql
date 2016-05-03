@@ -17,7 +17,7 @@ DROP TABLE IF EXISTS supportConfidence;
 CREATE TABLE IF NOT EXISTS billInputs (my_date STRING, products ARRAY<STRING>)
 ROW FORMAT SERDE 'radeon.BillSerDe';
 
-LOAD DATA INPATH 'hiveInput/example.txt'
+LOAD DATA INPATH 'hiveInput/${hiveconf:INPUT}'
 OVERWRITE INTO TABLE billInputs;
 
 CREATE TABLE bills AS

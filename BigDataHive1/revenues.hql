@@ -15,19 +15,24 @@ add jar ./BigDataHiveSerDe1-0.0.1-SNAPSHOT.jar;
 
 DROP TABLE IF EXISTS bills;
 DROP TABLE IF EXISTS costs;
+DROP TABLE IF EXISTS pricesStr;
+DROP TABLE IF EXISTS prices;
 
 CREATE TABLE IF NOT EXISTS bills (my_date STRING, products ARRAY<STRING>)
 ROW FORMAT SERDE 'radeon.BillSerDe';
 
-LOAD DATA INPATH 'hiveInput/example.txt'
-OVERWRITE INTO TABLE bills;
+LOAD DATA INPATH 'hiveInput/${hiveconf:INPUT}' OVERWRITE INTO TABLE bills;
 
-CREATE TABLE IF NOT EXISTS prices (product STRING, price INT)
+CREATE TABLE IF NOT EXISTS pricesStr (productStr STRING, priceStr STRING)
 ROW FORMAT DELIMITED
         FIELDS TERMINATED BY '=';
 
 LOAD DATA INPATH 'hiveInput/costs.properties'
-OVERWRITE INTO TABLE prices;
+OVERWRITE INTO TABLE pricesStr;
+
+CREATE TABLE prices AS
+SELECT trim(productStr) AS product, cast(trim(priceStr) AS INT) AS price
+FROM pricesStr;
 
 DROP TABLE IF EXISTS prodMonth;
 DROP TABLE IF EXISTS prodMonthCount;

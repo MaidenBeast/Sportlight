@@ -12,7 +12,7 @@ public class ProductArrayWritable extends ArrayWritable {
 		StringBuilder sb = new StringBuilder();
         for (String s : super.toStrings())
         {
-            sb.append(s).append(" ");
+            sb.append(s).append(", ");
         }
         return sb.toString();
 	}

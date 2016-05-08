@@ -71,6 +71,6 @@ public class MonthWritable implements Writable, WritableComparable<MonthWritable
 	}
 	
 	public String toString() {
-		return this.month.toString() + " " + this.sum.toString();
+		return this.month.toString() + ":" + this.sum.toString();
 	}
 }

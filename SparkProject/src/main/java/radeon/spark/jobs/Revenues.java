@@ -9,9 +9,12 @@ import org.apache.spark.api.java.function.FlatMapFunction;
 import org.apache.spark.api.java.function.PairFunction;
 
 import radeon.spark.data.MonthProductKey;
+import radeon.spark.data.MonthReport;
+import radeon.spark.data.comparators.MonthComparator;
 import radeon.spark.functions.IterativeSumFunction;
 import radeon.spark.parsing.BillParser;
 import radeon.spark.parsing.CostsParser;
+import radeon.spark.utils.MonthReports;
 import scala.Tuple2;
 
 public class Revenues {
@@ -61,15 +64,22 @@ public class Revenues {
 		JavaPairRDD<MonthProductKey, Integer> productMonthRevenues =
 				salesWithCosts.reduceByKey(new IterativeSumFunction());
 		
-		JavaPairRDD<String, Iterable<Tuple2<String, Integer>>> monthlyRevenuesPerProduct =
-				productMonthRevenues.mapToPair(new PairFunction<Tuple2<MonthProductKey, Integer>, String, Tuple2<String,Integer>>() {
-					public Tuple2<String, Tuple2<String,Integer>> call(Tuple2<MonthProductKey, Integer> pmRev) {
+		JavaPairRDD<String, Iterable<MonthReport>> monthlyRevenuesPerProduct =
+				productMonthRevenues.mapToPair(new PairFunction<Tuple2<MonthProductKey, Integer>, String, MonthReport>() {
+					public Tuple2<String, MonthReport> call(Tuple2<MonthProductKey, Integer> pmRev) {
 						String product = pmRev._1().getProduct();
 						String month = pmRev._1().getMonth();
 						Integer revenue = pmRev._2();
-						return new Tuple2<>(product, new Tuple2<>(month, revenue));
+						return new Tuple2<>(product, new MonthReport(month, revenue));
 					}
-				}).groupByKey();
+				}).groupByKey()
+				  .mapToPair(new PairFunction<Tuple2<String, Iterable<MonthReport>>,
+						                      String, Iterable<MonthReport>>(){
+					  public Tuple2<String, Iterable<MonthReport>>
+					         call(Tuple2<String, Iterable<MonthReport>> toOrder) {
+						  return new Tuple2<>(toOrder._1(), MonthReports.orderReports(toOrder._2(), new MonthComparator()));
+					  }
+				  });
 		
 		monthlyRevenuesPerProduct.saveAsTextFile(outputPath);
 		sc.close();

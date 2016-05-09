@@ -19,7 +19,7 @@ public class Revenues {
 	@SuppressWarnings("serial")
 	public static void main(String[] args) {
 		String inputPath = args[0];
-		String costPath = "costs.properties";
+		String costPath = "input/costs.properties";
 		String outputPath = args[1];
 		
 		SparkConf conf = new SparkConf().setAppName("Revenues");

@@ -11,13 +11,10 @@ import org.apache.spark.api.java.function.PairFlatMapFunction;
 import org.apache.spark.api.java.function.PairFunction;
 
 import radeon.spark.data.MonthProductKey;
-import radeon.spark.data.Product;
 import radeon.spark.data.ProductReport;
-import radeon.spark.data.comparators.CountComparator;
 import radeon.spark.data.comparators.ReportComparator;
 import radeon.spark.parsing.BillParser;
 import radeon.spark.utils.ProductReports;
-import radeon.spark.utils.Products;
 import scala.Tuple2;
 
 public class BestFivePerMonth {

@@ -8,13 +8,15 @@ import radeon.spark.data.MonthProductKey;
 import radeon.spark.data.MonthReport;
 import radeon.spark.parsing.BillParser;
 import radeon.spark.parsing.CostsParser;
+import radeon.spark.utils.MonthReports;
+import radeon.spark.data.comparators.MonthComparator;
 import scala.Tuple2;
 
 public class Revenues8 {
 	
 	public static void main(String[] args) {
 		String inputPath = args[0];
-		String costPath = "costs.properties";
+		String costPath = "input/costs.properties";
 		String outputPath = args[1];
 		
 		SparkConf conf = new SparkConf().setAppName("Revenues");
@@ -48,7 +50,9 @@ public class Revenues8 {
 		
 		JavaPairRDD<String, Iterable<MonthReport>> result =
 				product2monthRevenue.mapToPair(productMonth -> new Tuple2<>(productMonth._1(), new MonthReport(productMonth._2()._1(), productMonth._2()._2())))
-				                    .groupByKey();
+				                    .groupByKey()
+				                    .mapToPair(productMonths -> new Tuple2<>(productMonths._1(), MonthReports.orderReports(productMonths._2(),
+				                    		                                                                               new MonthComparator())));
 		
 		result.saveAsTextFile(outputPath);
 		double totalTime = (System.currentTimeMillis() - startTime) / 1000.0;

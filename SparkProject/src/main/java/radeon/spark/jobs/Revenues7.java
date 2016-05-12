@@ -17,7 +17,7 @@ import radeon.spark.parsing.CostsParser;
 import radeon.spark.utils.MonthReports;
 import scala.Tuple2;
 
-public class Revenues {
+public class Revenues7 {
 	
 	@SuppressWarnings("serial")
 	public static void main(String[] args) {
@@ -27,6 +27,8 @@ public class Revenues {
 		
 		SparkConf conf = new SparkConf().setAppName("Revenues");
 		JavaSparkContext sc = new JavaSparkContext(conf);
+		
+		long startTime = System.currentTimeMillis();
 		
 		//Prepara i costi
 		JavaPairRDD<String, Integer> prod2cost =
@@ -82,6 +84,8 @@ public class Revenues {
 				  });
 		
 		monthlyRevenuesPerProduct.saveAsTextFile(outputPath);
+		double totalTime = (System.currentTimeMillis() - startTime) / 1000.0;
+		System.out.println("Total elapsed time: " + totalTime);
 		sc.close();
 	}
 }

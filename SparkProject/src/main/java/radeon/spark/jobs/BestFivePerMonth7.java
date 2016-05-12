@@ -17,7 +17,7 @@ import radeon.spark.parsing.BillParser;
 import radeon.spark.utils.ProductReports;
 import scala.Tuple2;
 
-public class BestFivePerMonth {
+public class BestFivePerMonth7 {
 	
 	@SuppressWarnings("serial")
 	public static void main(String[] args) {
@@ -26,6 +26,8 @@ public class BestFivePerMonth {
 		
 		SparkConf conf = new SparkConf().setAppName("Best five per month");
 		JavaSparkContext sc = new JavaSparkContext(conf);
+		
+		long startTime = System.currentTimeMillis();
 		
 		JavaPairRDD<MonthProductKey, Integer> allSales =
 				sc.textFile(inputPath).flatMapToPair(new PairFlatMapFunction<String, MonthProductKey, Integer>() {
@@ -68,6 +70,8 @@ public class BestFivePerMonth {
 				});
 		
 		month2Top5.saveAsTextFile(outputPath);
+		double totalTime = (System.currentTimeMillis() - startTime) / 1000.0;
+		System.out.println("Total elapsed time: " + totalTime);
 		sc.close();
 	}
 }

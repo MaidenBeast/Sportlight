@@ -17,7 +17,7 @@ import radeon.spark.parsing.BillParser;
 import radeon.spark.utils.ProductPairs;
 import scala.Tuple2;
 
-public class SupportConfidence {
+public class SupportConfidence7 {
 	
 	public static void main(String[] args) {
 		String inputPath = args[0];
@@ -29,9 +29,9 @@ public class SupportConfidence {
 		long startTime = System.currentTimeMillis();
 		
 		JavaRDD<String> bills = sc.textFile(inputPath).cache();
-		int totalBills = (int) bills.count();
+		final int totalBills = (int) bills.count();
 		
-		BillParser parser = new BillParser();
+		final BillParser parser = new BillParser();
 		JavaPairRDD<String, Integer> billsWithProduct =
 				bills.flatMapToPair(new PairFlatMapFunction<String, String, Integer>() {
 					private static final long serialVersionUID = 1L;

@@ -73,6 +73,7 @@ public class BillingMain {
 			 * - la data viene generata in modo randomico nel formato yyyy-mm-dd
 			 */
 			IB.generate(outputFile, rows, maxFood, FOOD_DELIMITER);
+			System.out.println("Completato");
 		} catch (ParseException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

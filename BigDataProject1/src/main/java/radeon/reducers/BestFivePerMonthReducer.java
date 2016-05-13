@@ -1,15 +1,11 @@
 package radeon.reducers;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
-import org.apache.hadoop.io.ArrayWritable;
-import org.apache.hadoop.io.FloatWritable;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.Writable;
@@ -17,7 +13,6 @@ import org.apache.hadoop.mapreduce.Reducer;
 
 import radeon.data.ProductArrayWritable;
 import radeon.data.ProductWritable;
-import radeon.data.ProductWritableList;
 
 public class BestFivePerMonthReducer extends
 		Reducer<Text, ProductWritable, Text, ProductArrayWritable> {

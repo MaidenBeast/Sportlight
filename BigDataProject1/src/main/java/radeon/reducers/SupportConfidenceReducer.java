@@ -3,12 +3,9 @@ package radeon.reducers;
 import java.io.IOException;
 
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.IntWritable;
-import org.apache.hadoop.mapred.Counters.Counter;
 import org.apache.hadoop.mapreduce.Reducer;
 
-import radeon.data.PercentagesWritable;
 import radeon.data.ProductPairWritable;
 
 public class SupportConfidenceReducer extends

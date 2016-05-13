@@ -1,22 +1,17 @@
 package radeon;
 
-import radeon.data.ProductArrayWritable;
-import radeon.data.ProductWritable;
-import radeon.data.ProductWritableList;
-import radeon.mappers.BestFivePerMonthMapper;
-import radeon.reducers.BestFivePerMonthReducer;
-import radeon.utils.Jobs;
-
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.ArrayWritable;
-import org.apache.hadoop.io.FloatWritable;
-import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
+
+import radeon.data.ProductArrayWritable;
+import radeon.data.ProductWritable;
+import radeon.mappers.BestFivePerMonthMapper;
+import radeon.reducers.BestFivePerMonthReducer;
 
 public class BestFivePerMonth {
 

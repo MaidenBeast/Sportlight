@@ -4,13 +4,10 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 
-import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.io.WritableComparable;
 
-//IMPLEMENTARE IL COSTRUTTORE NO-ARG, se non c'� crea problemi ad Hadoop
-//Questo tipo � usato come chiave, quindi rientra nello shuffle and sort ed � richiesto quindi che implementi WritableComparable.
 public class ProductPairWritable implements Writable, WritableComparable<ProductPairWritable> {
 	
 	protected Text leftFood;

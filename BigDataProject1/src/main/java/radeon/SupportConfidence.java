@@ -3,9 +3,7 @@ package radeon;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.IntWritable;
-import org.apache.hadoop.mapred.lib.IdentityReducer;
 import org.apache.hadoop.mapreduce.Counter;
 import org.apache.hadoop.mapreduce.CounterGroup;
 import org.apache.hadoop.mapreduce.Counters;
@@ -19,7 +17,6 @@ import radeon.data.ProductPairWritable;
 import radeon.mappers.SupportConfidenceMapper;
 import radeon.mappers.SupportConfidenceMapper2;
 import radeon.reducers.SupportConfidenceReducer;
-import radeon.utils.Jobs;
 
 public class SupportConfidence {
 

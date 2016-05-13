@@ -1,17 +1,5 @@
 package radeon;
 
-import radeon.data.MonthArrayWritable;
-import radeon.data.MonthWritable;
-import radeon.data.ProductArrayWritable;
-import radeon.data.ProductWritable;
-import radeon.data.ProductWritableList;
-import radeon.mappers.BestFivePerMonthMapper;
-import radeon.mappers.RevenuesMapper;
-import radeon.reducers.BestFivePerMonthReducer;
-import radeon.reducers.RevenuesReducer;
-import radeon.utils.Jobs;
-
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Map.Entry;
 import java.util.Properties;
@@ -19,15 +7,17 @@ import java.util.Properties;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.ArrayWritable;
-import org.apache.hadoop.io.FloatWritable;
-import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 import org.apache.hadoop.security.UserGroupInformation;
+
+import radeon.data.MonthArrayWritable;
+import radeon.data.MonthWritable;
+import radeon.mappers.RevenuesMapper;
+import radeon.reducers.RevenuesReducer;
 
 public class Revenues {
 

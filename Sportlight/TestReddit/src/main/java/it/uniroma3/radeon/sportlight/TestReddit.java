@@ -23,10 +23,13 @@ public class TestReddit {
 	
 	private List<String> postIds; //in futuro questa lista verrà letta da MongoDB
 	
+	public TestReddit() {
+		this.postIds = new LinkedList<String>();
+	}
+	
 	public void bootstrap() {
 		this.bootPosts();
 		this.bootComments();
-		this.postIds = new LinkedList<String>();
 	}
 	
 	private void bootPosts() {
@@ -117,7 +120,7 @@ public class TestReddit {
 				JsonNode jsonComment = jsonRoot.get(1).get("data");
 				
 				JsonNode jsonPostChildren = jsonPost.get("children");
-				JsonNode jsonPostChildrenData = jsonPost.get(0).get("data");
+				JsonNode jsonPostChildrenData = jsonPostChildren.get(0).get("data");
 				
 				String selftext = jsonPostChildrenData.get("selftext").asText();
 				
@@ -125,12 +128,16 @@ public class TestReddit {
 					System.out.println("Selftext: "+selftext);
 				}
 				
-				JsonNode jsonCommentChildren = jsonPost.get("children");
+				JsonNode jsonCommentChildren = jsonComment.get("children");
 				
 				for (JsonNode jsonCommentChild : jsonCommentChildren) {
 					JsonNode jsonCommentChildData = jsonCommentChild.get("data");
-					String bodyComment = jsonCommentChildData.get("body").asText();
-					System.out.println("Comment :"+bodyComment);
+					JsonNode jsonCommentChildDataBody = jsonCommentChildData.get("body");
+					
+					if (jsonCommentChildDataBody != null) {
+						String bodyComment = jsonCommentChildData.get("body").asText();
+						System.out.println("Comment: "+bodyComment);
+					}
 				}
 				
 			} catch (MalformedURLException e) {

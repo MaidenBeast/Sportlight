@@ -117,7 +117,8 @@ public class TestReddit {
 				JsonNode jsonRoot = mapper.readTree(conn.getInputStream());
 				
 				JsonNode jsonPost = jsonRoot.get(0).get("data");
-				JsonNode jsonComment = jsonRoot.get(1).get("data");
+				JsonNode jsonCommentRoot = jsonRoot.get(1);
+				this.visitCommentTree(jsonCommentRoot);
 				
 				JsonNode jsonPostChildren = jsonPost.get("children");
 				JsonNode jsonPostChildrenData = jsonPostChildren.get(0).get("data");
@@ -126,18 +127,6 @@ public class TestReddit {
 				
 				if (!selftext.equals("")) {
 					System.out.println("Selftext: "+selftext);
-				}
-				
-				JsonNode jsonCommentChildren = jsonComment.get("children");
-				
-				for (JsonNode jsonCommentChild : jsonCommentChildren) {
-					JsonNode jsonCommentChildData = jsonCommentChild.get("data");
-					JsonNode jsonCommentChildDataBody = jsonCommentChildData.get("body");
-					
-					if (jsonCommentChildDataBody != null) {
-						String bodyComment = jsonCommentChildData.get("body").asText();
-						System.out.println("Comment: "+bodyComment);
-					}
 				}
 				
 			} catch (MalformedURLException e) {
@@ -155,6 +144,26 @@ public class TestReddit {
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
+			}
+		}
+	}
+	
+	private void visitCommentTree(JsonNode jsonComment) {
+		JsonNode jsonCommentChildren = jsonComment.get("data").get("children");
+		
+		for (JsonNode jsonCommentChild : jsonCommentChildren) {
+			JsonNode jsonCommentChildData = jsonCommentChild.get("data");
+			JsonNode jsonCommentChildDataBody = jsonCommentChildData.get("body");
+			
+			if (jsonCommentChildDataBody != null) {
+				String bodyComment = jsonCommentChildData.get("body").asText();
+				System.out.println("Comment: "+bodyComment);
+			}
+			
+			JsonNode jsonCommentReplies = jsonCommentChildData.get("replies");
+			
+			if (jsonCommentReplies != null && jsonCommentReplies.isObject()) { //sono presenti delle risposte al commento
+				visitCommentTree(jsonCommentReplies);
 			}
 		}
 	}

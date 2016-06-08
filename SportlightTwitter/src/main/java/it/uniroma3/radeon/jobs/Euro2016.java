@@ -33,8 +33,7 @@ public class Euro2016 implements Serializable {
 	    
 	    JavaDStream<TweetData> tweets = tweetsStream.map(new TweetMapper());
 	    
-	    final TweetCondition[] conditions1 = {new EqualsCondition("IsRetweet", true)};
-	    JavaDStream<TweetData> provaFilter = tweets.filter(new TweetFilteringFunction(conditions1));
+	    JavaDStream<TweetData> provaFilter = tweets.filter(new TweetFilteringFunction(new EqualsCondition("IsRetweet", true)));
 	    
 //	    JavaDStream<TweetData> euroTweets = tweets.filter(new TweetFilteringFunction("User.Name", "UEFAEURO"));
 //	    

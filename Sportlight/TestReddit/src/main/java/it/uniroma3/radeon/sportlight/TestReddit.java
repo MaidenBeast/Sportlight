@@ -1,6 +1,7 @@
 package it.uniroma3.radeon.sportlight;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -9,12 +10,16 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Properties;
+
+import org.apache.kafka.clients.producer.KafkaProducer;
+import org.apache.kafka.clients.producer.ProducerRecord;
 
 import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.io.Resources;
 
 import it.uniroma3.radeon.sportlight.data.Comment;
 import it.uniroma3.radeon.sportlight.data.Post;
@@ -27,13 +32,24 @@ public class TestReddit {
 	
 	private List<Post> postList; //in futuro questa lista verrà letta da MongoDB
 	
+	KafkaProducer<String, String> producer;
+	
 	public TestReddit() {
 		this.postList = new LinkedList<Post>();
+		try (InputStream props = Resources.getResource("producer.props").openStream()) {
+            Properties properties = new Properties();
+            properties.load(props);
+            producer = new KafkaProducer<>(properties);
+        } catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	public void bootstrap() {
 		this.bootPosts();
 		this.bootComments();
+		this.producer.close();
 	}
 	
 	private void bootPosts() {
@@ -80,10 +96,13 @@ public class TestReddit {
 									jsonChildData.get("name").asText());
 					post.setBody(jsonChildData.get("selftext").asText());
 					post.setTitle(jsonChildData.get("title").asText());
+					post.setSrc("reddit");
 					
 					this.postList.add(post);
 					
 					System.out.println(mapper.writeValueAsString(post));
+					producer.send(new ProducerRecord<String, String>("sportlight",mapper.writeValueAsString(post)));
+					
 				}
 				
 			} catch (MalformedURLException e) {
@@ -148,6 +167,7 @@ public class TestReddit {
 				
 				for (Comment comment : comments) {
 					System.out.println(mapper.writeValueAsString(comment));
+					producer.send(new ProducerRecord<String, String>("sportlight", mapper.writeValueAsString(comment)));
 				}
 				
 			} catch (MalformedURLException e) {

@@ -8,12 +8,14 @@ import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 public class Comment {
 	private String id;
 	private String body;
+	private String type;
 	
 	@JsonIgnore
 	private Post post;
 	
 	public Comment() {
 		this.body = "";
+		this.type = "comment";
 	}
 	
 	public String getId() {
@@ -38,6 +40,14 @@ public class Comment {
 
 	public void setPost(Post post) {
 		this.post = post;
+	}
+
+	public String getType() {
+		return type;
+	}
+
+	public void setType(String type) {
+		this.type = type;
 	}
 	
 }

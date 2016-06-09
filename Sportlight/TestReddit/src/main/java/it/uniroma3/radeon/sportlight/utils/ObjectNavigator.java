@@ -18,7 +18,7 @@ public class ObjectNavigator {
 		try {
 			Method getterMethod = this.instanceType.getMethod(getterName);
 			Object returned = getterMethod.invoke(this.instanceType.cast(this.instance));
-			if (fieldPath.length > 1) {
+			if (fieldPath.length == 1) {
 				return returned;
 			}
 			else {

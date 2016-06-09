@@ -11,9 +11,13 @@ import java.util.LinkedList;
 import java.util.List;
 
 import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import it.uniroma3.radeon.sportlight.data.Comment;
+import it.uniroma3.radeon.sportlight.data.Post;
 
 public class TestReddit {
 	private static final String REDDIT_URL_TEMPLATE = "https://www.reddit.com/r/Euro2016/.json?sort=new&raw_json=1";
@@ -21,10 +25,10 @@ public class TestReddit {
 	
 	private static final String MODIFIED_USER_AGENT = "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:46.0) Gecko/20100101 Firefox/46.0";
 	
-	private List<String> postIds; //in futuro questa lista verrà letta da MongoDB
+	private List<Post> postList; //in futuro questa lista verrà letta da MongoDB
 	
 	public TestReddit() {
-		this.postIds = new LinkedList<String>();
+		this.postList = new LinkedList<Post>();
 	}
 	
 	public void bootstrap() {
@@ -60,9 +64,9 @@ public class TestReddit {
 				
 				after_param = "&after=".concat(jsonData.get("after").asText());
 				
-				for (JsonNode jsonChild : jsonChildren) { 
+				for (JsonNode jsonChild : jsonChildren) {
 					JsonNode jsonChildData = jsonChild.get("data");
-					this.postIds.add(jsonChildData.get("id").asText());
+					
 					long createTime = jsonChildData.get("created").asLong()*1000;
 					
 					//se il post è stato pubblicato un'anno fa, allora blocca entrambi i cicli
@@ -70,7 +74,16 @@ public class TestReddit {
 						toIterate = false;
 						break;
 					}
-					System.out.println(jsonChildData);
+					
+					Post post = new Post();
+					post.setId("reddit_"+
+									jsonChildData.get("name").asText());
+					post.setBody(jsonChildData.get("selftext").asText());
+					post.setTitle(jsonChildData.get("title").asText());
+					
+					this.postList.add(post);
+					
+					System.out.println(mapper.writeValueAsString(post));
 				}
 				
 			} catch (MalformedURLException e) {
@@ -99,8 +112,11 @@ public class TestReddit {
 	}
 	
 	private void bootComments() {
-		for (String postId : this.postIds) {
+		//for (String postId : this.postList) {
+		for (Post post : this.postList) {
 			URL url = null;
+			String postId = post.getId();
+			postId = postId.substring(postId.lastIndexOf("_")+1);
 			String postUrl = String.format(REDDIT_URL_POST_TEMPLATE, postId);
 			
 			try {
@@ -116,17 +132,22 @@ public class TestReddit {
 				
 				JsonNode jsonRoot = mapper.readTree(conn.getInputStream());
 				
-				JsonNode jsonPost = jsonRoot.get(0).get("data");
+				//JsonNode jsonPost = jsonRoot.get(0).get("data");
 				JsonNode jsonCommentRoot = jsonRoot.get(1);
-				this.visitCommentTree(jsonCommentRoot);
+				List<Comment> comments = this.visitCommentTree(jsonCommentRoot, post);
 				
-				JsonNode jsonPostChildren = jsonPost.get("children");
-				JsonNode jsonPostChildrenData = jsonPostChildren.get(0).get("data");
+				//JsonNode jsonPostChildren = jsonPost.get("children");
+				//JsonNode jsonPostChildrenData = jsonPostChildren.get(0).get("data");
 				
-				String selftext = jsonPostChildrenData.get("selftext").asText();
+				//String selftext = jsonPostChildrenData.get("selftext").asText();
+				//post.setBody(selftext);
 				
-				if (!selftext.equals("")) {
+				/*if (!selftext.equals("")) {
 					System.out.println("Selftext: "+selftext);
+				}*/
+				
+				for (Comment comment : comments) {
+					System.out.println(mapper.writeValueAsString(comment));
 				}
 				
 			} catch (MalformedURLException e) {
@@ -148,23 +169,37 @@ public class TestReddit {
 		}
 	}
 	
-	private void visitCommentTree(JsonNode jsonComment) {
+	private List<Comment> visitCommentTree(JsonNode jsonComment, Post post) {
+		List<Comment> comments = new LinkedList<Comment>();
+		
 		JsonNode jsonCommentChildren = jsonComment.get("data").get("children");
 		
 		for (JsonNode jsonCommentChild : jsonCommentChildren) {
+			
 			JsonNode jsonCommentChildData = jsonCommentChild.get("data");
 			JsonNode jsonCommentChildDataBody = jsonCommentChildData.get("body");
 			
 			if (jsonCommentChildDataBody != null) {
+				
+				Comment comment = new Comment();
+				comment.setId(jsonCommentChildData.get("name").asText());
 				String bodyComment = jsonCommentChildData.get("body").asText();
-				System.out.println("Comment: "+bodyComment);
+				comment.setBody(bodyComment);
+				comment.setPost(post);
+				
+				post.addComment(comment);
+				
+				comments.add(comment);
+				//System.out.println("Comment: "+bodyComment);
 			}
 			
 			JsonNode jsonCommentReplies = jsonCommentChildData.get("replies");
 			
 			if (jsonCommentReplies != null && jsonCommentReplies.isObject()) { //sono presenti delle risposte al commento
-				visitCommentTree(jsonCommentReplies);
+				List<Comment> replies = visitCommentTree(jsonCommentReplies, post);
+				comments.addAll(replies);
 			}
 		}
+		return comments;
 	}
 }

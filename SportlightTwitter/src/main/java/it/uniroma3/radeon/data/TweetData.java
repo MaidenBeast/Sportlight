@@ -43,6 +43,6 @@ public class TweetData implements Serializable {
 
 	public String toString() {
 		return "User: " + this.user.getName() + "\n" +
-	           this.getText() + " [" + this.getIsRetweet() + "]";
+	           this.getText() + "\n";
 	}
 }

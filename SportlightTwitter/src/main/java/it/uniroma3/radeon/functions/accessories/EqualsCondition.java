@@ -12,6 +12,10 @@ public class EqualsCondition extends TweetCondition {
 	
 	public Boolean verify(TweetData td) {
 		Object fieldValue = this.fieldLookup(td);
+		if (fieldValue == null) {
+			System.out.println("Filtered out for null value");
+			return false;
+		}
 		return fieldValue.equals(this.getCondition());
 	}
 

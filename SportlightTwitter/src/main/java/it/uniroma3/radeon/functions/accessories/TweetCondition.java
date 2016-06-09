@@ -12,6 +12,10 @@ public abstract class TweetCondition implements Serializable {
 	private String[] accessList;
 	private Object condition;
 	
+	public TweetCondition(String attribute) {
+		this.accessList = attribute.split("\\.");
+	}
+	
 	public TweetCondition(String attribute, Object condition) {
 		this.accessList = attribute.split("\\.");
 		this.condition = condition;

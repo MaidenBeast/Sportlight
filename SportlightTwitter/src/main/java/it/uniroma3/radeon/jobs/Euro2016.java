@@ -3,6 +3,7 @@ package it.uniroma3.radeon.jobs;
 import it.uniroma3.radeon.data.TweetData;
 import it.uniroma3.radeon.functions.TweetFilteringFunction;
 import it.uniroma3.radeon.functions.accessories.EqualsCondition;
+import it.uniroma3.radeon.functions.accessories.RegexpCondition;
 import it.uniroma3.radeon.functions.accessories.TweetCondition;
 import it.uniroma3.radeon.functions.mappers.TweetMapper;
 import it.uniroma3.radeon.streaming.StreamLoader;
@@ -33,7 +34,7 @@ public class Euro2016 implements Serializable {
 	    
 	    JavaDStream<TweetData> tweets = tweetsStream.map(new TweetMapper());
 	    
-	    JavaDStream<TweetData> provaFilter = tweets.filter(new TweetFilteringFunction(new EqualsCondition("IsRetweet", true)));
+	    JavaDStream<TweetData> provaFilter = tweets.filter(new TweetFilteringFunction(new RegexpCondition("User.Name", "^a")));
 	    
 //	    JavaDStream<TweetData> euroTweets = tweets.filter(new TweetFilteringFunction("User.Name", "UEFAEURO"));
 //	    

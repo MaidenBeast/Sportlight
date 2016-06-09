@@ -16,6 +16,7 @@ public class TweetDataBuilder implements Serializable {
 		UserData tweetUser = new UserDataBuilder().buildFromUser(stat.getUser());
 		tweet.setUser(tweetUser);
 		tweet.setText(stat.getText());
+		tweet.setIsRetweet(stat.isRetweet());
 		
 		return tweet;
 	}

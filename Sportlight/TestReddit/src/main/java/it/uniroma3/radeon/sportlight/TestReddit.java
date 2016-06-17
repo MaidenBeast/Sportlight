@@ -23,6 +23,8 @@ import com.google.common.io.Resources;
 
 import it.uniroma3.radeon.sportlight.data.Comment;
 import it.uniroma3.radeon.sportlight.data.Post;
+import it.uniroma3.radeon.sportlight.db.MongoPostRepository;
+import it.uniroma3.radeon.sportlight.db.PostRepository;
 
 public class TestReddit {
 	private static final String REDDIT_URL_TEMPLATE = "https://www.reddit.com/r/Euro2016/.json?sort=new&raw_json=1";
@@ -34,12 +36,15 @@ public class TestReddit {
 	
 	KafkaProducer<String, String> producer;
 	
+	PostRepository post_repo;
+	
 	public TestReddit() {
 		this.postList = new LinkedList<Post>();
 		try (InputStream props = Resources.getResource("producer.props").openStream()) {
             Properties properties = new Properties();
             properties.load(props);
             producer = new KafkaProducer<>(properties);
+            post_repo = new MongoPostRepository();
         } catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -101,7 +106,7 @@ public class TestReddit {
 					this.postList.add(post);
 					
 					System.out.println(mapper.writeValueAsString(post));
-					producer.send(new ProducerRecord<String, String>("sportlight",mapper.writeValueAsString(post)));
+					//producer.send(new ProducerRecord<String, String>("sportlight",mapper.writeValueAsString(post)));
 					
 				}
 				
@@ -137,6 +142,7 @@ public class TestReddit {
 			String postId = post.getId();
 			postId = postId.substring(postId.lastIndexOf("_")+1);
 			String postUrl = String.format(REDDIT_URL_POST_TEMPLATE, postId);
+			ObjectMapper mapper = new ObjectMapper();
 			
 			try {
 				url = new URL(postUrl);
@@ -144,8 +150,6 @@ public class TestReddit {
 				
 				//workaround per l'errore HTTP 429 (Too Many Requests)
 				conn.setRequestProperty("User-Agent", MODIFIED_USER_AGENT);
-				
-				ObjectMapper mapper = new ObjectMapper();
 				
 				System.out.println("\nGetting Reddit data from "+url.toURI());
 				
@@ -167,8 +171,13 @@ public class TestReddit {
 				
 				for (Comment comment : comments) {
 					System.out.println(mapper.writeValueAsString(comment));
-					producer.send(new ProducerRecord<String, String>("sportlight", mapper.writeValueAsString(comment)));
+					//producer.send(new ProducerRecord<String, String>("sportlight", mapper.writeValueAsString(comment)));
 				}
+				//persisto il post su MongoDB
+				post_repo.persistOne(post);
+				
+				//invio al topic Kafka
+				producer.send(new ProducerRecord<String, String>("sportlight", mapper.writeValueAsString(post)));
 				
 			} catch (MalformedURLException e) {
 				// TODO Auto-generated catch block

@@ -1,11 +1,13 @@
-package it.uniroma3.radeon.sa.functions;
+package it.uniroma3.radeon.sa.data;
 
-public class NormalizationRule {
+public class NormalizationRule extends DataBean {
 	
 	private String rawText;
 	private String normalizedText;
 	
-	public NormalizationRule() {}
+	public NormalizationRule() {
+		super("RawText");
+	}
 
 	public String getRawText() {
 		return rawText;

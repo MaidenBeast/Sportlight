@@ -1,15 +1,13 @@
 package it.uniroma3.radeon.sa.data;
 
-public class TweetTrainingExample extends DataBean {
+public class TweetTrainingExample {
 	
 	private Integer id;
 	private String rawText;
 	private String normalizedText;
 	private Integer sentiment;
 	
-	public TweetTrainingExample() {
-		super("Id");
-	}
+	public TweetTrainingExample() {}
 	
 	public Integer getId() {
 		return id;

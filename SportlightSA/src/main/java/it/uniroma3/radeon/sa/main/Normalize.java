@@ -53,7 +53,7 @@ public class Normalize {
 		
 		//Carica i tweet da normalizzare
 		JavaPairRDD<Integer, TweetTrainingExample> tweetMap = sc.textFile(conf.get("Tweets"))
-				                                            .map(new ExampleMapper("\".+\""))
+				                                            .map(new ExampleMapper(","))
 				                                            .mapToPair(new PopKeyFunction<Integer, TweetTrainingExample>("id"))
 				                                            .sortByKey()
 				                                            .cache();
@@ -76,5 +76,6 @@ public class Normalize {
 				                                                 .map(new TweetNormalizerMapper());
 		
 		normalizedTweets.saveAsTextFile(conf.get("OutputFile"));
+		sc.close();
 	}
 }

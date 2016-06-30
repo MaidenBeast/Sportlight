@@ -2,9 +2,13 @@ package it.uniroma3.radeon.sa.main;
 
 import it.uniroma3.radeon.sa.data.NormalizationRule;
 import it.uniroma3.radeon.sa.data.TweetTrainingExample;
-import it.uniroma3.radeon.sa.functions.MakePairFunction;
+import it.uniroma3.radeon.sa.data.TweetWord;
+import it.uniroma3.radeon.sa.functions.FieldExtractFunction;
+import it.uniroma3.radeon.sa.functions.MapPairValueFunction;
+import it.uniroma3.radeon.sa.functions.PopKeyFunction;
 import it.uniroma3.radeon.sa.functions.mappers.ExampleMapper;
 import it.uniroma3.radeon.sa.functions.mappers.NormRuleMapper;
+import it.uniroma3.radeon.sa.functions.mappers.TweetWordMapper;
 
 import java.io.FileReader;
 import java.util.Properties;
@@ -40,7 +44,7 @@ public class Normalize {
 		//Carica le regole di normalizzazione
 		JavaPairRDD<String, NormalizationRule> normRulesMap = sc.textFile(conf.get("NormRules"))
 				                                                .map(new NormRuleMapper("="))
-				                                                .mapToPair(new MakePairFunction<String, NormalizationRule>())
+				                                                .mapToPair(new PopKeyFunction<String, NormalizationRule>("rawText"))
 				                                                .cache();
 		
 		//Carica la lista di parole rilevanti
@@ -48,10 +52,14 @@ public class Normalize {
 				                          .cache();
 		
 		//Carica i tweet da normalizzare
-		JavaPairRDD<Integer, TweetTrainingExample> tweetsMap = sc.textFile(conf.get("Tweets"))
-				                                                 .map(new ExampleMapper("\".+\""))
-				                                                 .mapToPair(new MakePairFunction<Integer, TweetTrainingExample>())
-				                                                 .sortByKey()
-				                                                 .cache();
+		JavaRDD<TweetTrainingExample> tweets = sc.textFile(conf.get("Tweets"))
+				                                 .map(new ExampleMapper("\".+\""))
+				                                 .cache();
+		
+		//Spezza i tweet in parole
+		JavaPairRDD<String, TweetWord> tweetWordsMap = tweets.flatMap(new TweetWordMapper())
+				                                             .mapToPair(new PopKeyFunction<String, TweetWord>("word"));
+		
+		//Normalizza le parole secondo le regole
 	}
 }

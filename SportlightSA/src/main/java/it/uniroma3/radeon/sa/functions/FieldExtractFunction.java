@@ -3,6 +3,7 @@ package it.uniroma3.radeon.sa.functions;
 import org.apache.spark.api.java.function.Function;
 
 import it.uniroma3.radeon.sa.data.DataBean;
+import it.uniroma3.radeon.sa.utils.ObjectNavigator;
 
 public class FieldExtractFunction<B extends DataBean, V> implements Function<B, V> {
 	
@@ -16,18 +17,12 @@ public class FieldExtractFunction<B extends DataBean, V> implements Function<B, 
 
 	@SuppressWarnings("unchecked")
 	public V call(B bean) throws Exception {
-		String capFieldName = Character.toUpperCase(this.fieldName.charAt(0)) + this.fieldName.substring(1);
-		String getterName = "get" + capFieldName;
 		try {
-			Object fieldValueObj = bean.getClass().getMethod(getterName).invoke(bean);
-			V value = (V) fieldValueObj;
-			return value;
+			ObjectNavigator nav = new ObjectNavigator(bean, bean.getClass());
+			V field = (V) nav.retrieveField(this.fieldName);
+			return field;
 		}
-		catch (NoSuchMethodException e) {
-			e.printStackTrace();
-			return null;
-		}
-		catch (ClassCastException e) {
+		catch (NullPointerException | ClassCastException e) {
 			e.printStackTrace();
 			return null;
 		}

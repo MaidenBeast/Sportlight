@@ -1,6 +1,10 @@
 package it.uniroma3.radeon.sa.data;
 
-public class TweetTrainingExample {
+import java.io.Serializable;
+
+public class TweetTrainingExample implements Serializable {
+	
+	private static final long serialVersionUID = 1L;
 	
 	private Integer id;
 	private String rawText;
@@ -39,5 +43,9 @@ public class TweetTrainingExample {
 
 	public void setSentiment(Integer sentimentLabel) {
 		this.sentiment = sentimentLabel;
+	}
+	
+	public String toString() {
+		return this.id + "," + this.sentiment + "," + this.rawText;
 	}
 }

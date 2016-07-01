@@ -16,7 +16,7 @@ public class ExampleMapper extends TextMapper<TweetTrainingExample> {
 		TweetTrainingExample example = new TweetTrainingExample();
 		example.setId(Integer.parseInt(tweetFields[0]));
 		example.setSentiment(Integer.parseInt(tweetFields[1]));
-		example.setRawText(new TextCleaner().cleanUp(tweetFields[2]));
+		example.setRawText(new TextCleaner().simplifySpaces(tweetFields[2]));
 		return example;
 	}
 }

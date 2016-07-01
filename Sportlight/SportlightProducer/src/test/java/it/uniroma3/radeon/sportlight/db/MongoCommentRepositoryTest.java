@@ -1,10 +1,9 @@
 package it.uniroma3.radeon.sportlight.db;
 
-import static org.junit.Assert.*;
-
 import java.util.ArrayList;
 import java.util.List;
 
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -22,7 +21,7 @@ public class MongoCommentRepositoryTest {
 	}
 
 	@Test
-	public void test() {
+	public void testPersist() {
 		List<Post> posts = new ArrayList<Post>(2);
 		
 		Post post1 = new Post();
@@ -71,6 +70,43 @@ public class MongoCommentRepositoryTest {
 		
 		this.comment_repo.persistOne(comment4);
 		
+	}
+	
+	@Test
+	public void testFindById() {
+		Post post1 = this.post_repo.findByPostId("post1", true);
+		Post post2 = this.post_repo.findByPostId("post2", true);
+		
+		Assert.assertEquals("post1", post1.getId());
+		Assert.assertEquals("post1", post1.getTitle());
+		Assert.assertEquals("post1", post1.getBody());
+		Assert.assertEquals("reddit", post1.getSrc());
+		
+		Assert.assertNotEquals(post1.getComments().size(), 0);
+		
+		Assert.assertEquals("post2", post2.getId());
+		Assert.assertEquals("post2", post2.getTitle());
+		Assert.assertEquals("post2", post2.getBody());
+		Assert.assertEquals("reddit", post2.getSrc());
+		
+		Assert.assertNotEquals(post2.getComments().size(), 0);
+		
+		post1 = this.post_repo.findByPostId("post1", false);
+		post2 = this.post_repo.findByPostId("post2", false);
+		
+		Assert.assertEquals("post1", post1.getId());
+		Assert.assertEquals("post1", post1.getTitle());
+		Assert.assertEquals("post1", post1.getBody());
+		Assert.assertEquals("reddit", post1.getSrc());
+		
+		Assert.assertEquals(post1.getComments().size(), 0);
+		
+		Assert.assertEquals("post2", post2.getId());
+		Assert.assertEquals("post2", post2.getTitle());
+		Assert.assertEquals("post2", post2.getBody());
+		Assert.assertEquals("reddit", post2.getSrc());
+		
+		Assert.assertEquals(post2.getComments().size(), 0);
 	}
 
 }

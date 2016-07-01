@@ -8,6 +8,7 @@ import org.bson.Document;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mongodb.client.MongoCollection;
+import com.mongodb.client.model.IndexOptions;
 import com.mongodb.client.model.UpdateOneModel;
 import com.mongodb.client.model.WriteModel;
 
@@ -20,7 +21,7 @@ public class MongoCommentRepository implements CommentRepository {
 	public MongoCommentRepository() {
 		this.mongoDataSource = new MongoDataSource();
 		MongoCollection<Document> collection = this.mongoDataSource.getCollection("post");
-		collection.createIndex(new Document("comment.id", 1)); //creo indice su comment.id
+		collection.createIndex(new Document("comment.id", 1), new IndexOptions().unique(true)); //creo indice su comment.id
 	}
 
 	@Override
@@ -35,7 +36,6 @@ public class MongoCommentRepository implements CommentRepository {
 			Document updateQueryDoc = new Document("$push", new Document("comments", commentDoc));
 			collection.updateOne(queryDoc, updateQueryDoc);
 		} catch (JsonProcessingException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
@@ -60,10 +60,34 @@ public class MongoCommentRepository implements CommentRepository {
 			collection.bulkWrite(bulkUpdateList);
 			
 		} catch (JsonProcessingException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
+	}
+
+	@Override
+	public Comment findCommentById(String id) {
+		/*
+		 * esempio query diretta su MongoDB
+		 * db.getCollection("post").find(
+		 * 		{"comments.id": "comment1"},
+		 * 		{_id: 0, comments:
+		 * 			{$elemMatch: 
+		 * 				{
+		 * 					id: "comment1"
+		 * 				}
+		 * 			}
+		 * 		}
+		 * );
+		 *
+		 */
+		
+		Comment comment = null;
+		
+		ObjectMapper mapper = new ObjectMapper();
+		MongoCollection<Document> collection = this.mongoDataSource.getCollection("post");
+		
+		return comment;
 	}
 
 }

@@ -2,6 +2,7 @@ package it.uniroma3.radeon.sa.main;
 
 import it.uniroma3.radeon.sa.data.TweetTrainingExample;
 import it.uniroma3.radeon.sa.data.TweetWord;
+import it.uniroma3.radeon.sa.functions.ConcatFunction;
 import it.uniroma3.radeon.sa.functions.GetPairValueFunction;
 import it.uniroma3.radeon.sa.functions.PopKeyFunction;
 import it.uniroma3.radeon.sa.functions.mappers.ExampleMapper;
@@ -36,7 +37,7 @@ public class Normalize {
 			System.exit(1);
 		}
 		
-		SparkConf conf = new SparkConf().setAppName("Sentiment Analysis trainer")
+		SparkConf conf = new SparkConf().setAppName("Sentiment Analysis normalizer")
 										.set("Tweets", prop.get("tweets").toString())
 				                        .set("NormRules", prop.get("normRules").toString())
 		                                .set("RelevantWords", prop.get("relevantWords").toString())
@@ -72,13 +73,12 @@ public class Normalize {
 				                                                              .mapToPair(new PopKeyFunction<Integer, TweetWord>("tweetId"))
 				                                                              .groupByKey();
 		
-		id2NormWords.saveAsTextFile("file://" + conf.get("OutputFile"));
+		//Ricostruisci i tweet normalizzati
+		JavaRDD<TweetTrainingExample> normalizedTweets = tweetMap.join(id2NormWords)
+				                                                 .map(new GetPairValueFunction<Integer, Tuple2<TweetTrainingExample, Iterable<TweetWord>>>())
+				                                                 .map(new TweetNormalizerMapper());
 		
-//		//Ricostruisci i tweet normalizzati
-//		JavaRDD<TweetTrainingExample> normalizedTweets = tweetMap.join(id2NormWords)
-//				                                                 .map(new GetPairValueFunction<Integer, Tuple2<TweetTrainingExample, Iterable<TweetWord>>>())
-//				                                                 .map(new TweetNormalizerMapper());
-		
+		normalizedTweets.saveAsTextFile("file://" + conf.get("OutputFile"));
 		sc.close();
 	}
 }

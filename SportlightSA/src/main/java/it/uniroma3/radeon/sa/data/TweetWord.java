@@ -1,6 +1,10 @@
 package it.uniroma3.radeon.sa.data;
 
-public class TweetWord {
+import java.io.Serializable;
+
+public class TweetWord implements Serializable {
+	
+	private static final long serialVersionUID = 1L;
 	
 	private Integer tweetId;
 	private String word;
@@ -21,5 +25,9 @@ public class TweetWord {
 
 	public void setWord(String word) {
 		this.word = word;
+	}
+	
+	public String toString() {
+		return this.word;
 	}
 }

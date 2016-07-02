@@ -1,7 +1,6 @@
 package it.uniroma3.radeon.sa.functions.mappers;
 
 import scala.Tuple2;
-import it.uniroma3.radeon.sa.data.NormalizationRule;
 
 public class NormRulePairMapper extends TextToPairMapper<String, String> {
 

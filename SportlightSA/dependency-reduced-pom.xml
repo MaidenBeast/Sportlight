@@ -2,7 +2,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>it.uniroma3.bigdata</groupId>
-  <artifactId>SportlightTwitter</artifactId>
+  <artifactId>SportlightSA</artifactId>
   <version>0.1</version>
   <build>
     <plugins>
@@ -87,16 +87,8 @@
           <groupId>org.apache.commons</groupId>
         </exclusion>
         <exclusion>
-          <artifactId>commons-math3</artifactId>
-          <groupId>org.apache.commons</groupId>
-        </exclusion>
-        <exclusion>
           <artifactId>jsr305</artifactId>
           <groupId>com.google.code.findbugs</groupId>
-        </exclusion>
-        <exclusion>
-          <artifactId>slf4j-api</artifactId>
-          <groupId>org.slf4j</groupId>
         </exclusion>
         <exclusion>
           <artifactId>jul-to-slf4j</artifactId>
@@ -119,10 +111,6 @@
           <groupId>com.ning</groupId>
         </exclusion>
         <exclusion>
-          <artifactId>snappy-java</artifactId>
-          <groupId>org.xerial.snappy</groupId>
-        </exclusion>
-        <exclusion>
           <artifactId>lz4</artifactId>
           <groupId>net.jpountz.lz4</groupId>
         </exclusion>
@@ -141,10 +129,6 @@
         <exclusion>
           <artifactId>akka-slf4j_2.10</artifactId>
           <groupId>com.typesafe.akka</groupId>
-        </exclusion>
-        <exclusion>
-          <artifactId>scala-library</artifactId>
-          <groupId>org.scala-lang</groupId>
         </exclusion>
         <exclusion>
           <artifactId>json4s-jackson_2.10</artifactId>
@@ -187,10 +171,6 @@
           <groupId>io.dropwizard.metrics</groupId>
         </exclusion>
         <exclusion>
-          <artifactId>jackson-databind</artifactId>
-          <groupId>com.fasterxml.jackson.core</groupId>
-        </exclusion>
-        <exclusion>
           <artifactId>jackson-module-scala_2.10</artifactId>
           <groupId>com.fasterxml.jackson.module</groupId>
         </exclusion>
@@ -221,12 +201,6 @@
       <artifactId>spark-streaming_2.10</artifactId>
       <version>1.6.1</version>
       <scope>provided</scope>
-      <exclusions>
-        <exclusion>
-          <artifactId>scala-library</artifactId>
-          <groupId>org.scala-lang</groupId>
-        </exclusion>
-      </exclusions>
     </dependency>
   </dependencies>
   <properties>

@@ -1,6 +1,5 @@
 package it.uniroma3.radeon.sa.functions;
 
-import it.uniroma3.radeon.sa.data.DataBean;
 import it.uniroma3.radeon.sa.utils.ObjectNavigator;
 
 import org.apache.spark.api.java.function.PairFunction;

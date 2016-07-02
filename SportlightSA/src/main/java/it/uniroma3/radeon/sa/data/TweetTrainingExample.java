@@ -1,15 +1,17 @@
 package it.uniroma3.radeon.sa.data;
 
-public class TweetTrainingExample extends DataBean {
+import java.io.Serializable;
+
+public class TweetTrainingExample implements Serializable {
+	
+	private static final long serialVersionUID = 1L;
 	
 	private Integer id;
 	private String rawText;
 	private String normalizedText;
 	private Integer sentiment;
 	
-	public TweetTrainingExample() {
-		super("Id");
-	}
+	public TweetTrainingExample() {}
 	
 	public Integer getId() {
 		return id;
@@ -41,5 +43,9 @@ public class TweetTrainingExample extends DataBean {
 
 	public void setSentiment(Integer sentimentLabel) {
 		this.sentiment = sentimentLabel;
+	}
+	
+	public String toString() {
+		return this.id + "," + this.sentiment + "," + this.rawText;
 	}
 }

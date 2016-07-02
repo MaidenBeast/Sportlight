@@ -8,11 +8,11 @@ public class ExampleMapper extends TextMapper<TweetTrainingExample> {
 	private static final long serialVersionUID = 1L;
 	
 	public ExampleMapper(String sep) {
-		super(sep, "pattern");
+		super(sep);
 	}
-
+	
 	public TweetTrainingExample call(String text) throws Exception {
-		String[] tweetFields = this.matchPattern(text);
+		String[] tweetFields = this.splitText(text);
 		TweetTrainingExample example = new TweetTrainingExample();
 		example.setId(Integer.parseInt(tweetFields[0]));
 		example.setSentiment(Integer.parseInt(tweetFields[1]));

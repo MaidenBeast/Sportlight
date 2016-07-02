@@ -1,11 +1,9 @@
 package it.uniroma3.radeon.sa.main;
 
 import it.uniroma3.radeon.sa.data.TweetExample;
-import it.uniroma3.radeon.sa.functions.mappers.ClassificationMapper;
+import it.uniroma3.radeon.sa.functions.mappers.EvaluationMapper;
 import it.uniroma3.radeon.sa.functions.mappers.ExampleMapper;
-import it.uniroma3.radeon.sa.functions.mappers.LabeledPointMapper;
 import it.uniroma3.radeon.sa.functions.mappers.LabeledPointMapper2;
-import it.uniroma3.radeon.sa.functions.normalization.SlangTranslateFunction;
 import it.uniroma3.radeon.sa.utils.Parsing;
 
 import java.io.FileReader;
@@ -65,7 +63,7 @@ public class Train {
 		NaiveBayesModel model = NaiveBayes.train(training.rdd());
 		
 		//Effettua la classificazione sul test set
-		JavaRDD<Tuple2<Object, Object>> classResults = test.map(new ClassificationMapper(model));
+		JavaRDD<Tuple2<Object, Object>> classResults = test.map(new EvaluationMapper(model));
 		
 		//Stampa a video una metrica di valutazione del modello (F-Measure)
 		MulticlassMetrics stats = new MulticlassMetrics(classResults.rdd());

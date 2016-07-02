@@ -1,10 +1,14 @@
 package it.uniroma3.radeon.sa.main;
 
+import it.uniroma3.radeon.sa.data.LabeledTweet;
 import it.uniroma3.radeon.sa.data.TweetExample;
+import it.uniroma3.radeon.sa.data.UnlabeledTweet;
 import it.uniroma3.radeon.sa.functions.FieldExtractFunction;
 import it.uniroma3.radeon.sa.functions.PopKeyFunction;
+import it.uniroma3.radeon.sa.functions.mappers.ClassificationMapper;
 import it.uniroma3.radeon.sa.functions.mappers.ExampleMapper;
-import it.uniroma3.radeon.sa.functions.mappers.LocalVectorMapper;
+import it.uniroma3.radeon.sa.functions.mappers.UnlabeledTweetMapper;
+import it.uniroma3.radeon.sa.functions.mappers.VectorMapper;
 import it.uniroma3.radeon.sa.utils.Parsing;
 
 import java.io.FileReader;
@@ -47,15 +51,19 @@ public class Classify {
 		HashingTF htf = new HashingTF(1000);
 		
 		//Carica e normalizza i tweet da classificare
-		JavaPairRDD<Integer, TweetExample> normClassSet = sc.textFile("file://" + conf.get("Tweets"))
-				                                            .map(new ExampleMapper(",", translationRules))
-				                                            .mapToPair(new PopKeyFunction<Integer, TweetExample>("id"))
-				                                            .cache();
+		JavaRDD<UnlabeledTweet> normClassSet = sc.textFile("file://" + conf.get("Tweets"))
+				                                 .map(new UnlabeledTweetMapper(",", translationRules));
+		
+		//Calcola una rappresentazione vettoriale dei tweet da classificare
+		JavaRDD<UnlabeledTweet> vsmClassSet = normClassSet.map(new VectorMapper(htf));
 		
 		//Carica il modello di classificazione
 		NaiveBayesModel model = NaiveBayesModel.load(sc.sc(), "file://" + conf.get("Model"));
 		
-		//Usa il modello per classificare il classSet
+		//Classifica i tweet per sentimento utilizzando il modello
+		JavaRDD<LabeledTweet> classifiedSet = vsmClassSet.map(new ClassificationMapper(model));
+		
+		classifiedSet.saveAsTextFile("file://" + conf.get("ResultOutput"));
 		sc.close();
 	}
 }

@@ -2,7 +2,7 @@ package it.uniroma3.radeon.sa.data;
 
 import java.io.Serializable;
 
-public class TweetTrainingExample implements Serializable {
+public class TweetExample implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 	
@@ -11,7 +11,7 @@ public class TweetTrainingExample implements Serializable {
 	private String normalizedText;
 	private Integer sentiment;
 	
-	public TweetTrainingExample() {}
+	public TweetExample() {}
 	
 	public Integer getId() {
 		return id;

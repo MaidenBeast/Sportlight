@@ -1,10 +1,11 @@
 package it.uniroma3.radeon.sportlight.db;
 
+import static java.util.Arrays.asList;
+
 import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -121,6 +122,20 @@ public class MongoCommentRepositoryTest {
 
 		Assert.assertEquals("comment3", comment3.getId());
 		Assert.assertEquals("post2.comment3", comment3.getBody());
+	}
+	
+	@Test
+	public void testFindCommentsByIds() {
+		List<Comment> comments = this.comment_repo.findCommentsByIds(asList("comment1", "comment2", "comment4", "comment5"));
+		
+		Assert.assertEquals("comment1", comments.get(0).getId());
+		Assert.assertEquals("post1.comment1", comments.get(0).getBody());
+		
+		Assert.assertEquals("comment2", comments.get(1).getId());
+		Assert.assertEquals("post1.comment2", comments.get(1).getBody());
+		
+		Assert.assertEquals("comment4", comments.get(2).getId());
+		Assert.assertEquals("post2.comment4", comments.get(2).getBody());
 	}
 
 }

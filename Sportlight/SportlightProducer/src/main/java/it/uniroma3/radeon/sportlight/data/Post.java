@@ -73,5 +73,11 @@ public class Post {
 	public void setType(String type) {
 		this.type = type;
 	}
+
+	@Override
+	public String toString() {
+		return "Post [id=" + id + ", src=" + src + ", title=" + title + ", body=" + body + ", comments=" + comments
+				+ ", type=" + type + "]";
+	}
 	
 }

@@ -49,5 +49,10 @@ public class Comment {
 	public void setType(String type) {
 		this.type = type;
 	}
+
+	@Override
+	public String toString() {
+		return "Comment [id=" + id + ", body=" + body + ", type=" + type + ", post=" + post + "]";
+	}
 	
 }

@@ -144,16 +144,21 @@ public class MongoCommentRepository implements CommentRepository {
 		 *	]);
 		 */
 		
-		List<Comment> comments = new ArrayList<Comment>(ids.size());
+		final List<Comment> commentList = new ArrayList<Comment>(ids.size());
 		
-		ObjectMapper mapper = new ObjectMapper();
+		final ObjectMapper mapper = new ObjectMapper();
 		MongoCollection<Document> collection = this.mongoDataSource.getCollection("post");
+		
+		List<Document> orDocuments = new ArrayList<Document>(ids.size());
+		
+		for (String id : ids)
+			orDocuments.add(new Document("$eq", asList("$$comment.id",id)));
 		
 		AggregateIterable<Document> iterable = collection.aggregate(asList(
 		        new Document("$match",
 		        				new Document("comments.id",
 		        						new Document("$in",
-		        								asList("comment1", "comment2", "comment3", "comment5")
+		        								ids
 		        						)
 		        				)
 		        			),
@@ -163,12 +168,7 @@ public class MongoCommentRepository implements CommentRepository {
 		        								new Document("input", "$comments")
 		        								.append("as", "comment")
 		        								.append("cond", new Document(
-			        										"$or", asList(
-			        												new Document("$eq", asList("$$comment.id","comment1")),
-			        												new Document("$eq", asList("$$comment.id","comment2")),
-			        												new Document("$eq", asList("$$comment.id","comment3")),
-			        												new Document("$eq", asList("$$comment.id","comment5"))
-			        											)
+			        										"$or", orDocuments
 		        											)
 		        										)
 		        								)
@@ -179,12 +179,20 @@ public class MongoCommentRepository implements CommentRepository {
 		iterable.forEach(new Block<Document>() {
 		    @Override
 		    public void apply(final Document document) {
-		        System.out.println(document.toJson());
+		    	JsonNode rootNode;
+				try {
+					rootNode = mapper.readValue(document.toJson(), JsonNode.class);
+					JsonNode commentsNode = rootNode.get("comments");
+					List<Comment> comments = asList(mapper.readValue(commentsNode.traverse(), Comment[].class));
+			        commentList.addAll(comments);
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 		    }
 		});
 
-		
-		return comments;
+		return commentList;
 	}
 
 }

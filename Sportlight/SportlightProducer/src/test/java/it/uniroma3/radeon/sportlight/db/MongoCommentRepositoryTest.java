@@ -126,7 +126,16 @@ public class MongoCommentRepositoryTest {
 	
 	@Test
 	public void testFindCommentsByIds() {
-		this.comment_repo.findCommentsByIds(asList("comment1", "comment2", "comment3", "comment5"));
+		List<Comment> comments = this.comment_repo.findCommentsByIds(asList("comment1", "comment2", "comment4", "comment5"));
+		
+		Assert.assertEquals("comment1", comments.get(0).getId());
+		Assert.assertEquals("post1.comment1", comments.get(0).getBody());
+		
+		Assert.assertEquals("comment2", comments.get(1).getId());
+		Assert.assertEquals("post1.comment2", comments.get(1).getBody());
+		
+		Assert.assertEquals("comment4", comments.get(2).getId());
+		Assert.assertEquals("post2.comment4", comments.get(2).getBody());
 	}
 
 }

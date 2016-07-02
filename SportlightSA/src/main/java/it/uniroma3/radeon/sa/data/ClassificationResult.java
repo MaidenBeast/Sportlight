@@ -2,17 +2,14 @@ package it.uniroma3.radeon.sa.data;
 
 import java.io.Serializable;
 
-import org.apache.spark.mllib.regression.LabeledPoint;
-
-public class LabeledTweet implements Serializable {
+public class ClassificationResult implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 	
 	private String text;
-	private LabeledPoint labeledVector;
 	private Double sentiment;
 	
-	public LabeledTweet() {}
+	public ClassificationResult() {}
 
 	public String getText() {
 		return text;
@@ -20,14 +17,6 @@ public class LabeledTweet implements Serializable {
 
 	public void setText(String text) {
 		this.text = text;
-	}
-	
-	public LabeledPoint getLabeledVector() {
-		return this.labeledVector;
-	}
-	
-	public void setLabeledVector(LabeledPoint lp) {
-		this.labeledVector = lp;
 	}
 
 	public Double getSentiment() {

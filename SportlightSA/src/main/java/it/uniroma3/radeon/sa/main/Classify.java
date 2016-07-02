@@ -1,14 +1,10 @@
 package it.uniroma3.radeon.sa.main;
 
-import it.uniroma3.radeon.sa.data.LabeledTweet;
-import it.uniroma3.radeon.sa.data.TweetExample;
+import it.uniroma3.radeon.sa.data.ClassificationResult;
 import it.uniroma3.radeon.sa.data.UnlabeledTweet;
-import it.uniroma3.radeon.sa.functions.FieldExtractFunction;
-import it.uniroma3.radeon.sa.functions.PopKeyFunction;
 import it.uniroma3.radeon.sa.functions.mappers.ClassificationMapper;
-import it.uniroma3.radeon.sa.functions.mappers.ExampleMapper;
 import it.uniroma3.radeon.sa.functions.mappers.UnlabeledTweetMapper;
-import it.uniroma3.radeon.sa.functions.mappers.VectorMapper;
+import it.uniroma3.radeon.sa.functions.modifiers.VectorizerModifier;
 import it.uniroma3.radeon.sa.utils.Parsing;
 
 import java.io.FileReader;
@@ -16,12 +12,10 @@ import java.util.Map;
 import java.util.Properties;
 
 import org.apache.spark.SparkConf;
-import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.mllib.classification.NaiveBayesModel;
 import org.apache.spark.mllib.feature.HashingTF;
-import org.apache.spark.mllib.linalg.Vector;
 
 public class Classify {
 	
@@ -41,9 +35,9 @@ public class Classify {
 		Map<String, String> translationRules = Parsing.ruleParser(prop.get("translationRules").toString(), "=");
 		
 		SparkConf conf = new SparkConf().setAppName("Sentiment Analysis classifier")
-				                        .set("Tweets", prop.get("tweets").toString())
-										.set("Model", prop.get("modelDir").toString())
-		                                .set("ResultOutput", prop.get("output").toString());
+				                        .set("RawTweets", prop.get("rawTweets").toString())
+										.set("ModelInputDir", prop.get("modelInputDir").toString())
+		                                .set("ResultOutputDir", prop.get("resultOutputDir").toString());
 		
 		JavaSparkContext sc = new JavaSparkContext(conf);
 		
@@ -51,19 +45,19 @@ public class Classify {
 		HashingTF htf = new HashingTF(1000);
 		
 		//Carica e normalizza i tweet da classificare
-		JavaRDD<UnlabeledTweet> normClassSet = sc.textFile("file://" + conf.get("Tweets"))
+		JavaRDD<UnlabeledTweet> normClassSet = sc.textFile("file://" + conf.get("RawTweets"))
 				                                 .map(new UnlabeledTweetMapper(",", translationRules));
 		
 		//Calcola una rappresentazione vettoriale dei tweet da classificare
-		JavaRDD<UnlabeledTweet> vsmClassSet = normClassSet.map(new VectorMapper(htf));
+		JavaRDD<UnlabeledTweet> vsmClassSet = normClassSet.map(new VectorizerModifier(htf));
 		
 		//Carica il modello di classificazione
-		NaiveBayesModel model = NaiveBayesModel.load(sc.sc(), "file://" + conf.get("Model"));
+		NaiveBayesModel model = NaiveBayesModel.load(sc.sc(), "file://" + conf.get("ModelInputDir"));
 		
 		//Classifica i tweet per sentimento utilizzando il modello
-		JavaRDD<LabeledTweet> classifiedSet = vsmClassSet.map(new ClassificationMapper(model));
+		JavaRDD<ClassificationResult> classifiedSet = vsmClassSet.map(new ClassificationMapper(model));
 		
-		classifiedSet.saveAsTextFile("file://" + conf.get("ResultOutput"));
+		classifiedSet.saveAsTextFile("file://" + conf.get("ResultOutputDir"));
 		sc.close();
 	}
 }

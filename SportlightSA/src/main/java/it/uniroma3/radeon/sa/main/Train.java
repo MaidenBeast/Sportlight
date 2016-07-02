@@ -1,9 +1,10 @@
 package it.uniroma3.radeon.sa.main;
 
-import it.uniroma3.radeon.sa.data.TweetExample;
+import it.uniroma3.radeon.sa.data.LabeledTweet;
+import it.uniroma3.radeon.sa.functions.FieldExtractFunction;
 import it.uniroma3.radeon.sa.functions.mappers.EvaluationMapper;
-import it.uniroma3.radeon.sa.functions.mappers.ExampleMapper;
-import it.uniroma3.radeon.sa.functions.mappers.LabeledPointMapper2;
+import it.uniroma3.radeon.sa.functions.mappers.LabeledTweetMapper;
+import it.uniroma3.radeon.sa.functions.modifiers.LabeledPointModifier;
 import it.uniroma3.radeon.sa.utils.Parsing;
 
 import java.io.FileReader;
@@ -39,8 +40,8 @@ public class Train {
 		Map<String, String> normRules = Parsing.ruleParser(prop.get("normRules").toString(), "=");
 		
 		SparkConf conf = new SparkConf().setAppName("Sentiment Analysis trainer")
-										.set("Tweets", prop.get("tweets").toString())
-		                                .set("ModelOutput", prop.get("output").toString());
+										.set("RawTweets", prop.get("rawTweets").toString())
+		                                .set("ModelOutputDir", prop.get("modelOutputDir").toString());
 		
 		JavaSparkContext sc = new JavaSparkContext(conf);
 		
@@ -48,14 +49,15 @@ public class Train {
 		HashingTF htf = new HashingTF(1000);
 		
 		//Carica e normalizza il training set
-		JavaRDD<TweetExample> normTrainingSet = sc.textFile("file://" + conf.get("Tweets"))
-				                                  .map(new ExampleMapper(",", normRules));
+		JavaRDD<LabeledTweet> normTrainingSet = sc.textFile("file://" + conf.get("RawTweets"))
+				                                   .map(new LabeledTweetMapper(",", normRules));
 		
-		//Trasforma il training set in labeled points
-		JavaRDD<LabeledPoint> labeledSet = normTrainingSet.map(new LabeledPointMapper2(htf));
+		//Calcola una rappresentazione vettoriale dei tweet etichettati
+		JavaRDD<LabeledTweet> vsmTrainingSet = normTrainingSet.map(new LabeledPointModifier(htf));
 		
 		//Dividi il training set in training e test
-		JavaRDD<LabeledPoint>[] splitSet = labeledSet.randomSplit(new double[]{0.6, 0.4}, 11L);
+		JavaRDD<LabeledPoint>[] splitSet = vsmTrainingSet.map(new FieldExtractFunction<LabeledTweet, LabeledPoint>("labeledVector"))
+				                                         .randomSplit(new double[]{0.6, 0.4}, 11L);
 		JavaRDD<LabeledPoint> training = splitSet[0];
 		JavaRDD<LabeledPoint> test = splitSet[1];
 		
@@ -72,7 +74,7 @@ public class Train {
 		}
 		
 		//Salva il modello per poterlo applicare in fase di classificazione pura
-		model.save(sc.sc(), "file://" + conf.get("ModelOutput"));
+		model.save(sc.sc(), "file://" + conf.get("ModelOutputDir"));
 		sc.close();
 	}
 }

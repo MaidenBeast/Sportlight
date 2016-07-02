@@ -1,14 +1,11 @@
 package it.uniroma3.radeon.sa.functions.mappers;
 
-import it.uniroma3.radeon.sa.data.LabeledTweet;
+import it.uniroma3.radeon.sa.data.ClassificationResult;
 import it.uniroma3.radeon.sa.data.UnlabeledTweet;
 
 import org.apache.spark.mllib.classification.NaiveBayesModel;
-import org.apache.spark.mllib.regression.LabeledPoint;
 
-import scala.Tuple2;
-
-public class ClassificationMapper extends RDDMapper<UnlabeledTweet, LabeledTweet> {
+public class ClassificationMapper extends RDDMapper<UnlabeledTweet, ClassificationResult> {
 	
 	private NaiveBayesModel model;
 	
@@ -18,11 +15,10 @@ public class ClassificationMapper extends RDDMapper<UnlabeledTweet, LabeledTweet
 	
 	private static final long serialVersionUID = 1L;
 	
-	public LabeledTweet call(UnlabeledTweet unlabeled) throws Exception {
+	public ClassificationResult call(UnlabeledTweet unlabeled) throws Exception {
 		Double predictedLabel = this.model.predict(unlabeled.getVsm());
-		LabeledTweet labeled = new LabeledTweet();
+		ClassificationResult labeled = new ClassificationResult();
 		labeled.setText(unlabeled.getText());
-		labeled.setVsm(unlabeled.getVsm());
 		labeled.setSentiment(predictedLabel);
 		return labeled;
 	}

@@ -26,7 +26,7 @@ public class MongoPostRepository implements PostRepository {
 		this.mongoDataSource = new MongoDataSource();
 		MongoCollection<Document> collection = this.mongoDataSource.getCollection("post");
 		collection.createIndex(new Document("id", 1), new IndexOptions().unique(true)); //creo indice su id
-		collection.createIndex(new Document("comment.id", 1), new IndexOptions().unique(true)); //creo indice su comment.id
+		collection.createIndex(new Document("comment.id", 1)); //creo indice su comment.id
 	}
 	
 	@Override

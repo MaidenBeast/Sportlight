@@ -1,15 +1,15 @@
 package it.uniroma3.radeon.sa.functions.mappers;
 
 import scala.Tuple2;
-import it.uniroma3.radeon.sa.data.TweetTrainingExample;
+import it.uniroma3.radeon.sa.data.TweetExample;
 import it.uniroma3.radeon.sa.data.TweetWord;
 
-public class TweetNormalizerMapper extends PairMapper<TweetTrainingExample, Iterable<TweetWord>, TweetTrainingExample> {
+public class TweetNormalizerMapper extends PairMapper<TweetExample, Iterable<TweetWord>, TweetExample> {
 	
 	private static final long serialVersionUID = 1L;
 
-	public TweetTrainingExample call(Tuple2<TweetTrainingExample, Iterable<TweetWord>> tuple) {
-		TweetTrainingExample original = tuple._1();
+	public TweetExample call(Tuple2<TweetExample, Iterable<TweetWord>> tuple) {
+		TweetExample original = tuple._1();
 		Iterable<TweetWord> normalizedWords = tuple._2();
 		original.setRawText(this.joinWords(normalizedWords));
 		return original;

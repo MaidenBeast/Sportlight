@@ -1,8 +1,7 @@
-package it.uniroma3.radeon.sa.main;
+package it.uniroma3.radeon.sa.subjobs;
 
 import it.uniroma3.radeon.sa.data.TweetExample;
 import it.uniroma3.radeon.sa.data.TweetWord;
-import it.uniroma3.radeon.sa.functions.ConcatFunction;
 import it.uniroma3.radeon.sa.functions.GetPairValueFunction;
 import it.uniroma3.radeon.sa.functions.PopKeyFunction;
 import it.uniroma3.radeon.sa.functions.mappers.ExampleMapper;
@@ -11,51 +10,33 @@ import it.uniroma3.radeon.sa.functions.mappers.TweetNormalizerMapper;
 import it.uniroma3.radeon.sa.functions.mappers.TweetWordMapper;
 import it.uniroma3.radeon.sa.functions.mappers.WordNormalizerMapper;
 
-import java.io.FileReader;
-import java.util.Properties;
-
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 
-import com.google.common.base.Optional;
-
 import scala.Tuple2;
 
-public class Normalize {
+import com.google.common.base.Optional;
+
+public class NormalizationJob extends SubJob {
 	
-	public static void main(String[] args) {
-		String configFile = args[0];
-		
-		Properties prop = new Properties();
-		try {
-			prop.load(new FileReader(configFile));
-		}
-		catch (Exception e) {
-			e.printStackTrace();
-			System.exit(1);
-		}
-		
-		SparkConf conf = new SparkConf().setAppName("Sentiment Analysis normalizer")
-										.set("Tweets", prop.get("tweets").toString())
-				                        .set("NormRules", prop.get("normRules").toString())
-		                                .set("RelevantWords", prop.get("relevantWords").toString())
-		                                .set("OutputFile", prop.get("output").toString());
-		
-		JavaSparkContext sc = new JavaSparkContext(conf);
-		
+	public NormalizationJob(JavaSparkContext context, SparkConf config) {
+		super(context, config);
+	}
+
+	@Override
+	public JavaRDD<?> execute() {
 		//Carica le regole di normalizzazione
-		JavaPairRDD<String, String> normRules = sc.textFile("file://" + conf.get("NormRules"))
+		JavaPairRDD<String, String> normRules = this.getContext().textFile("file://" + this.getConfig().get("NormRules"))
 				                                  .mapToPair(new NormRulePairMapper("="))
 				                                  .cache();
-		
 //		//Carica la lista di parole rilevanti
 //		JavaRDD<String> relevantWords = sc.textFile("file://" + conf.get("RelevantWords"))
 //				                          .cache();
 		
 		//Carica i tweet da normalizzare
-		JavaPairRDD<Integer, TweetExample> tweetMap = sc.textFile("file://" + conf.get("Tweets"))
+		JavaPairRDD<Integer, TweetExample> tweetMap = this.getContext().textFile("file://" + this.getConfig().get("Tweets"))
 				                                            .map(new ExampleMapper(","))
 				                                            .mapToPair(new PopKeyFunction<Integer, TweetExample>("id"))
 				                                            .sortByKey()
@@ -77,8 +58,10 @@ public class Normalize {
 		JavaRDD<TweetExample> normalizedTweets = tweetMap.join(id2NormWords)
 				                                                 .map(new GetPairValueFunction<Integer, Tuple2<TweetExample, Iterable<TweetWord>>>())
 				                                                 .map(new TweetNormalizerMapper());
-		
-		normalizedTweets.saveAsTextFile("file://" + conf.get("OutputFile"));
-		sc.close();
+		//Libera la memoria
+		normRules.unpersist();
+		tweetMap.unpersist();
+		return normalizedTweets;
 	}
+
 }

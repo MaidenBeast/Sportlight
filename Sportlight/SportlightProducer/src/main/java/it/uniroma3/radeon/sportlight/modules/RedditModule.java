@@ -23,12 +23,14 @@ import com.google.common.io.Resources;
 
 import it.uniroma3.radeon.sportlight.data.Comment;
 import it.uniroma3.radeon.sportlight.data.Post;
+import it.uniroma3.radeon.sportlight.db.CommentRepository;
 import it.uniroma3.radeon.sportlight.db.MongoPostRepository;
 import it.uniroma3.radeon.sportlight.db.PostRepository;
 
 public class RedditModule implements Module {
 	private static final String REDDIT_URL_TEMPLATE = "https://www.reddit.com/r/Euro2016/.json?sort=new&raw_json=1";
 	private static final String REDDIT_URL_POST_TEMPLATE = "https://www.reddit.com/r/Euro2016/comments/%s/new.json?sort=new&raw_json=1";
+	private static final String REDDIT_URL_NEW_COMMENTS = "https://www.reddit.com/r/Euro2016/comments.json";
 
 	private static final String MODIFIED_USER_AGENT = "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:46.0) Gecko/20100101 Firefox/46.0";
 
@@ -37,6 +39,7 @@ public class RedditModule implements Module {
 	KafkaProducer<String, String> producer;
 
 	PostRepository post_repo;
+	CommentRepository comment_repo;
 	
 	public RedditModule() {
 		this.postList = new LinkedList<Post>();
@@ -46,7 +49,6 @@ public class RedditModule implements Module {
 			producer = new KafkaProducer<>(properties);
 			post_repo = new MongoPostRepository();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -121,25 +123,19 @@ public class RedditModule implements Module {
 				}
 
 			} catch (MalformedURLException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (JsonParseException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (JsonMappingException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (URISyntaxException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			try {
 				Thread.sleep(1000); //attendi per un secondo (per evitare eventuali blocchi)
 			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		} while (toIterate);
@@ -183,6 +179,9 @@ public class RedditModule implements Module {
 					System.out.println(mapper.writeValueAsString(comment));
 					//producer.send(new ProducerRecord<String, String>("sportlight", mapper.writeValueAsString(comment)));
 				}
+				
+				//TODO: inserire check esistenza post e commenti su Mongo
+				
 				//persisto il post su MongoDB
 				post_repo.persistOne(post);
 
@@ -190,19 +189,15 @@ public class RedditModule implements Module {
 				producer.send(new ProducerRecord<String, String>("sportlight", mapper.writeValueAsString(post)));
 
 			} catch (MalformedURLException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (URISyntaxException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			try {
 				Thread.sleep(1000); //attendi per un secondo (per evitare eventuali blocchi)
 			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}

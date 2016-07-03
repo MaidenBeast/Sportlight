@@ -13,18 +13,18 @@ import it.uniroma3.radeon.sportlight.data.Comment;
 import it.uniroma3.radeon.sportlight.data.Post;
 import it.uniroma3.radeon.sportlight.db.mongo.MongoDataSource;
 
-public class MongoCommentRepositoryTest {
+public class MongoRepositoryTest {
 	private static MongoDataSource mongoDataSource;
 	private static PostRepository post_repo;
 	private static CommentRepository comment_repo;
 
 	@BeforeClass
 	public static void setUp() throws Exception {
-		MongoCommentRepositoryTest.post_repo = new MongoPostRepository();
-		MongoCommentRepositoryTest.comment_repo = new MongoCommentRepository();
-		MongoCommentRepositoryTest.mongoDataSource = new MongoDataSource();
+		MongoRepositoryTest.post_repo = new MongoPostRepository();
+		MongoRepositoryTest.comment_repo = new MongoCommentRepository();
+		MongoRepositoryTest.mongoDataSource = new MongoDataSource();
 		
-		MongoCommentRepositoryTest.mongoDataSource.getCollection("post").drop();
+		MongoRepositoryTest.mongoDataSource.getCollection("post").drop();
 		
 		List<Post> posts = new ArrayList<Post>(2);
 
@@ -44,41 +44,41 @@ public class MongoCommentRepositoryTest {
 
 		posts.add(post2);
 
-		MongoCommentRepositoryTest.post_repo.persistMany(posts);
+		MongoRepositoryTest.post_repo.persistMany(posts);
 
 		Comment comment1 = new Comment();
 		comment1.setId("comment1");
 		comment1.setBody("post1.comment1");
 		comment1.setPost(post1);
 
-		MongoCommentRepositoryTest.comment_repo.persistOne(comment1);
+		MongoRepositoryTest.comment_repo.persistOne(comment1);
 
 		Comment comment2 = new Comment();
 		comment2.setId("comment2");
 		comment2.setBody("post1.comment2");
 		comment2.setPost(post1);
 
-		MongoCommentRepositoryTest.comment_repo.persistOne(comment2);
+		MongoRepositoryTest.comment_repo.persistOne(comment2);
 
 		Comment comment3 = new Comment();
 		comment3.setId("comment3");
 		comment3.setBody("post2.comment3");
 		comment3.setPost(post2);
 
-		MongoCommentRepositoryTest.comment_repo.persistOne(comment3);
+		MongoRepositoryTest.comment_repo.persistOne(comment3);
 
 		Comment comment4 = new Comment();
 		comment4.setId("comment4");
 		comment4.setBody("post2.comment4");
 		comment4.setPost(post2);
 
-		MongoCommentRepositoryTest.comment_repo.persistOne(comment4);
+		MongoRepositoryTest.comment_repo.persistOne(comment4);
 	}
 
 	@Test
 	public void testFindPostById() {
-		Post post1 = this.post_repo.findByPostId("post1", true);
-		Post post2 = this.post_repo.findByPostId("post2", true);
+		Post post1 = this.post_repo.findPostById("post1", true);
+		Post post2 = this.post_repo.findPostById("post2", true);
 
 		Assert.assertEquals("post1", post1.getId());
 		Assert.assertEquals("post1", post1.getTitle());
@@ -94,8 +94,8 @@ public class MongoCommentRepositoryTest {
 
 		Assert.assertNotEquals(post2.getComments().size(), 0);
 
-		post1 = this.post_repo.findByPostId("post1", false);
-		post2 = this.post_repo.findByPostId("post2", false);
+		post1 = this.post_repo.findPostById("post1", false);
+		post2 = this.post_repo.findPostById("post2", false);
 
 		Assert.assertEquals("post1", post1.getId());
 		Assert.assertEquals("post1", post1.getTitle());
@@ -136,6 +136,33 @@ public class MongoCommentRepositoryTest {
 		
 		Assert.assertEquals("comment4", comments.get(2).getId());
 		Assert.assertEquals("post2.comment4", comments.get(2).getBody());
+	}
+	
+	@Test
+	public void testFindPostsByIds() {
+		List<Post> postList1 = this.post_repo.findPostsByIds(asList("post1", "post2"), false);
+		List<Post> postList2 = this.post_repo.findPostsByIds(asList("post1"), false);
+		List<Post> postList3 = this.post_repo.findPostsByIds(asList("post1", "post5"), false);
+		
+		Assert.assertEquals("post1", postList1.get(0).getId());
+		Assert.assertEquals("post1", postList1.get(0).getTitle());
+		Assert.assertEquals("post1", postList1.get(0).getBody());
+		
+		Assert.assertEquals("post2", postList1.get(1).getId());
+		Assert.assertEquals("post2", postList1.get(1).getTitle());
+		Assert.assertEquals("post2", postList1.get(1).getBody());
+		
+		Assert.assertTrue(postList2.size() == 1);
+		
+		Assert.assertEquals("post1", postList2.get(0).getId());
+		Assert.assertEquals("post1", postList2.get(0).getTitle());
+		Assert.assertEquals("post1", postList2.get(0).getBody());
+		
+		Assert.assertTrue(postList3.size() == 1);
+		
+		Assert.assertEquals("post1", postList3.get(0).getId());
+		Assert.assertEquals("post1", postList3.get(0).getTitle());
+		Assert.assertEquals("post1", postList3.get(0).getBody());
 	}
 
 }

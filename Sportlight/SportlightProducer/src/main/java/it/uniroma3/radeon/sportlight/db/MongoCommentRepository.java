@@ -121,7 +121,7 @@ public class MongoCommentRepository implements CommentRepository {
 	@Override
 	public List<Comment> findCommentsByIds(List<String> ids) {
 		/* 
-		 * TODO Implementare questo tipo di query
+		 * Schema della query:
 		 * db.getCollection("post").aggregate([
 		 *		{$match: {"comments.id": { $in : ["comment1", "comment2", "comment3", "comment5"] }}},
 		 *		{

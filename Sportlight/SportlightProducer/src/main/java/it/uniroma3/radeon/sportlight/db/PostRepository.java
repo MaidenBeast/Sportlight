@@ -7,5 +7,6 @@ import it.uniroma3.radeon.sportlight.data.Post;
 public interface PostRepository {
 	public void persistOne(Post post);
 	public void persistMany(List<Post> posts);
-	public Post findByPostId(String id, boolean alsoComments);
+	public Post findPostById(String id, boolean alsoComments);
+	public List<Post> findPostsByIds(List<String> ids, boolean alsoComments);
 }

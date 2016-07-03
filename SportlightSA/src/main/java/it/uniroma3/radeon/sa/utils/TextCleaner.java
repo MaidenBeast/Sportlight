@@ -16,7 +16,8 @@ public class TextCleaner {
 		String simplSpaces = this.simplifySpaces(text);
 		String translated = this.slangTranslate(simplSpaces);
 		String noPunct = this.removePunctuation(translated);
-		String finalStr = noPunct;
+		String lowerCase = this.uncapitalize(noPunct);
+		String finalStr = lowerCase;
 		
 		return finalStr;
 	}
@@ -43,6 +44,19 @@ public class TextCleaner {
 
 	public String removePunctuation(String text) {
 		return text.replaceAll("\\p{Punct}", "");
+	}
+	
+	public String uncapitalize(String text) {
+		String[] words = this.splitText(text);
+		List<String> lowerCaseWords = new ArrayList<>();
+		for (String word : words) {
+			lowerCaseWords.add(word.toLowerCase());
+		}
+		return this.concatList(lowerCaseWords);
+	}
+	
+	private String[] splitText(String text) {
+		return text.split(" ");
 	}
 	
 	private String concatList(List<String> wordList) {

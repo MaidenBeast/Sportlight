@@ -1,9 +1,11 @@
 package it.uniroma3.radeon.sportlight.db;
 
-import static java.util.Arrays.asList;
+import static java.util.Arrays.*;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -43,6 +45,14 @@ public class MongoRepositoryTest {
 		post2.setBody("post2");
 
 		posts.add(post2);
+		
+		Post post3 = new Post();
+		post3.setId("post3");
+		post3.setSrc("fb");
+		post3.setTitle("post3");
+		post3.setBody("post3");
+
+		posts.add(post3);
 
 		MongoRepositoryTest.post_repo.persistMany(posts);
 
@@ -79,6 +89,7 @@ public class MongoRepositoryTest {
 	public void testFindPostById() {
 		Post post1 = this.post_repo.findPostById("post1", true);
 		Post post2 = this.post_repo.findPostById("post2", true);
+		Post post3 = this.post_repo.findPostById("post3", true);
 
 		Assert.assertEquals("post1", post1.getId());
 		Assert.assertEquals("post1", post1.getTitle());
@@ -93,9 +104,17 @@ public class MongoRepositoryTest {
 		Assert.assertEquals("reddit", post2.getSrc());
 
 		Assert.assertNotEquals(post2.getComments().size(), 0);
+		
+		Assert.assertEquals("post3", post3.getId());
+		Assert.assertEquals("post3", post3.getTitle());
+		Assert.assertEquals("post3", post3.getBody());
+		Assert.assertEquals("fb", post3.getSrc());
+
+		Assert.assertEquals(post3.getComments().size(), 0);
 
 		post1 = this.post_repo.findPostById("post1", false);
 		post2 = this.post_repo.findPostById("post2", false);
+		post3 = this.post_repo.findPostById("post3", false);
 
 		Assert.assertEquals("post1", post1.getId());
 		Assert.assertEquals("post1", post1.getTitle());
@@ -110,6 +129,13 @@ public class MongoRepositoryTest {
 		Assert.assertEquals("reddit", post2.getSrc());
 
 		Assert.assertEquals(post2.getComments().size(), 0);
+		
+		Assert.assertEquals("post3", post3.getId());
+		Assert.assertEquals("post3", post3.getTitle());
+		Assert.assertEquals("post3", post3.getBody());
+		Assert.assertEquals("fb", post3.getSrc());
+
+		Assert.assertEquals(post3.getComments().size(), 0);
 	}
 
 	@Test
@@ -126,43 +152,79 @@ public class MongoRepositoryTest {
 	
 	@Test
 	public void testFindCommentsByIds() {
-		List<Comment> comments = this.comment_repo.findCommentsByIds(asList("comment1", "comment2", "comment4", "comment5"));
+		Map<String, Comment> comments = this.comment_repo.findCommentsByIds(new HashSet<String>(asList("comment1", "comment2", "comment4", "comment5")));
 		
-		Assert.assertEquals("comment1", comments.get(0).getId());
-		Assert.assertEquals("post1.comment1", comments.get(0).getBody());
+		Assert.assertEquals("comment1", comments.get("comment1").getId());
+		Assert.assertEquals("post1.comment1", comments.get("comment1").getBody());
 		
-		Assert.assertEquals("comment2", comments.get(1).getId());
-		Assert.assertEquals("post1.comment2", comments.get(1).getBody());
+		Assert.assertEquals("comment2", comments.get("comment2").getId());
+		Assert.assertEquals("post1.comment2", comments.get("comment2").getBody());
 		
-		Assert.assertEquals("comment4", comments.get(2).getId());
-		Assert.assertEquals("post2.comment4", comments.get(2).getBody());
+		Assert.assertEquals("comment4", comments.get("comment4").getId());
+		Assert.assertEquals("post2.comment4", comments.get("comment4").getBody());
 	}
 	
 	@Test
 	public void testFindPostsByIds() {
-		List<Post> postList1 = this.post_repo.findPostsByIds(asList("post1", "post2"), false);
-		List<Post> postList2 = this.post_repo.findPostsByIds(asList("post1"), false);
-		List<Post> postList3 = this.post_repo.findPostsByIds(asList("post1", "post5"), false);
+		Map<String, Post> postMap1 = this.post_repo.findPostsByIds(new HashSet<String>(asList("post1", "post2")), false);
+		Map<String, Post> postMap2 = this.post_repo.findPostsByIds(new HashSet<String>(asList("post1")), false);
+		Map<String, Post> postMap3 = this.post_repo.findPostsByIds(new HashSet<String>(asList("post1", "post5")), false);
 		
-		Assert.assertEquals("post1", postList1.get(0).getId());
-		Assert.assertEquals("post1", postList1.get(0).getTitle());
-		Assert.assertEquals("post1", postList1.get(0).getBody());
+		Assert.assertEquals("post1", postMap1.get("post1").getId());
+		Assert.assertEquals("post1", postMap1.get("post1").getTitle());
+		Assert.assertEquals("post1", postMap1.get("post1").getBody());
 		
-		Assert.assertEquals("post2", postList1.get(1).getId());
-		Assert.assertEquals("post2", postList1.get(1).getTitle());
-		Assert.assertEquals("post2", postList1.get(1).getBody());
+		Assert.assertEquals("post2", postMap1.get("post2").getId());
+		Assert.assertEquals("post2", postMap1.get("post2").getTitle());
+		Assert.assertEquals("post2", postMap1.get("post2").getBody());
 		
-		Assert.assertTrue(postList2.size() == 1);
+		Assert.assertTrue(postMap2.size() == 1);
 		
-		Assert.assertEquals("post1", postList2.get(0).getId());
-		Assert.assertEquals("post1", postList2.get(0).getTitle());
-		Assert.assertEquals("post1", postList2.get(0).getBody());
+		Assert.assertEquals("post1", postMap2.get("post1").getId());
+		Assert.assertEquals("post1", postMap2.get("post1").getTitle());
+		Assert.assertEquals("post1", postMap2.get("post1").getBody());
 		
-		Assert.assertTrue(postList3.size() == 1);
+		Assert.assertTrue(postMap3.size() == 1);
 		
-		Assert.assertEquals("post1", postList3.get(0).getId());
-		Assert.assertEquals("post1", postList3.get(0).getTitle());
-		Assert.assertEquals("post1", postList3.get(0).getBody());
+		Assert.assertEquals("post1", postMap3.get("post1").getId());
+		Assert.assertEquals("post1", postMap3.get("post1").getTitle());
+		Assert.assertEquals("post1", postMap3.get("post1").getBody());
+	}
+	
+	@Test
+	public void testFindAllPosts() {
+		Map<String, Post> posts = this.post_repo.findAllPosts(false);
+		
+		Assert.assertEquals("post1", posts.get("post1").getId());
+		Assert.assertEquals("post1", posts.get("post1").getTitle());
+		Assert.assertEquals("post1", posts.get("post1").getBody());
+		
+		Assert.assertEquals("post2", posts.get("post2").getId());
+		Assert.assertEquals("post2", posts.get("post2").getTitle());
+		Assert.assertEquals("post2", posts.get("post2").getBody());
+		
+		Assert.assertEquals("post3", posts.get("post3").getId());
+		Assert.assertEquals("post3", posts.get("post3").getTitle());
+		Assert.assertEquals("post3", posts.get("post3").getBody());
+		
+		Assert.assertTrue(posts.size() == 3);
+	}
+	
+	@Test
+	public void testFindAllPostsBySrcs() {
+		Map<String, Post> posts = this.post_repo.findAllPostsBySrcs(asList("reddit"), false);
+		
+		Assert.assertEquals("post1", posts.get("post1").getId());
+		Assert.assertEquals("post1", posts.get("post1").getTitle());
+		Assert.assertEquals("post1", posts.get("post1").getBody());
+		Assert.assertEquals("reddit", posts.get("post1").getSrc());
+		
+		Assert.assertEquals("post2", posts.get("post2").getId());
+		Assert.assertEquals("post2", posts.get("post2").getTitle());
+		Assert.assertEquals("post2", posts.get("post2").getBody());
+		Assert.assertEquals("reddit", posts.get("post2").getSrc());
+		
+		Assert.assertTrue(posts.size() == 2);
 	}
 
 }

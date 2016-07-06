@@ -6,7 +6,10 @@ import static java.util.Arrays.asList;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.bson.Document;
 import org.bson.conversions.Bson;
@@ -111,7 +114,6 @@ public class MongoCommentRepository implements CommentRepository {
 			Comment[] comments = mapper.readValue(commentsNode.traverse(), Comment[].class);
 			comment = comments[0];
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
@@ -119,9 +121,9 @@ public class MongoCommentRepository implements CommentRepository {
 	}
 
 	@Override
-	public List<Comment> findCommentsByIds(List<String> ids) {
+	public Map<String, Comment> findCommentsByIds(Set<String> ids) {
 		/* 
-		 * TODO Implementare questo tipo di query
+		 * Schema della query:
 		 * db.getCollection("post").aggregate([
 		 *		{$match: {"comments.id": { $in : ["comment1", "comment2", "comment3", "comment5"] }}},
 		 *		{
@@ -144,7 +146,7 @@ public class MongoCommentRepository implements CommentRepository {
 		 *	]);
 		 */
 		
-		final List<Comment> commentList = new ArrayList<Comment>(ids.size());
+		final Map<String, Comment> commentMap = new HashMap<String, Comment>(ids.size());
 		
 		final ObjectMapper mapper = new ObjectMapper();
 		MongoCollection<Document> collection = this.mongoDataSource.getCollection("post");
@@ -184,15 +186,16 @@ public class MongoCommentRepository implements CommentRepository {
 					rootNode = mapper.readValue(document.toJson(), JsonNode.class);
 					JsonNode commentsNode = rootNode.get("comments");
 					List<Comment> comments = asList(mapper.readValue(commentsNode.traverse(), Comment[].class));
-			        commentList.addAll(comments);
+					for (Comment comment : comments)
+						commentMap.put(comment.getId(), comment);
+			        //commentList.addAll(comments);
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 		    }
 		});
 
-		return commentList;
+		return commentMap;
 	}
 
 }

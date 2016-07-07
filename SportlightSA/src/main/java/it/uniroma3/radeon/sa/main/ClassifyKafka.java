@@ -18,15 +18,11 @@ import java.util.Map;
 import java.util.Properties;
 
 import org.apache.spark.SparkConf;
-import org.apache.spark.api.java.JavaRDD;
-import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.mllib.classification.NaiveBayesModel;
 import org.apache.spark.mllib.feature.HashingTF;
 import org.apache.spark.streaming.Durations;
 import org.apache.spark.streaming.api.java.JavaDStream;
 import org.apache.spark.streaming.api.java.JavaPairDStream;
-import org.apache.spark.streaming.api.java.JavaPairReceiverInputDStream;
-import org.apache.spark.streaming.api.java.JavaReceiverInputDStream;
 import org.apache.spark.streaming.api.java.JavaStreamingContext;
 import org.apache.spark.streaming.kafka.KafkaUtils;
 
@@ -59,12 +55,15 @@ public class ClassifyKafka {
 		
 		JavaStreamingContext stsc = new JavaStreamingContext(conf, Durations.seconds(2));
 		
+		Map<String, Integer> topics = new HashMap<>();
+		topics.put("tweets", 1);
+		
 		//Crea un convertitore che traduca ogni tweet in una rappresentazione vettoriale
 		HashingTF htf = new HashingTF(1000);
 		
 		//Crea uno stream di tweet da classificare dalla coda Kafka
 		JavaDStream<String> listenedTweets =
-				KafkaUtils.createStream(stsc, conf.get("ZKQuorum"), conf.get("ConsumerGroupID"), null)
+				KafkaUtils.createStream(stsc, conf.get("ZKQuorum"), conf.get("ConsumerGroupID"), topics)
 				          .map(new GetPairValueFunction<String, String>());
 		
 		//Normalizza i tweet da classificare

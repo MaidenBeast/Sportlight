@@ -7,7 +7,7 @@ public class ClassificationResult implements Serializable {
 	private static final long serialVersionUID = 1L;
 	
 	private String text;
-	private Double sentiment;
+	private String sentiment;
 	
 	public ClassificationResult() {}
 
@@ -19,11 +19,11 @@ public class ClassificationResult implements Serializable {
 		this.text = text;
 	}
 
-	public Double getSentiment() {
+	public String getSentiment() {
 		return sentiment;
 	}
 
-	public void setSentiment(Double sentiment) {
+	public void setSentiment(String sentiment) {
 		this.sentiment = sentiment;
 	}
 	

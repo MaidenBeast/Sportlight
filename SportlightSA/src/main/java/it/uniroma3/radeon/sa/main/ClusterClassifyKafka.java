@@ -2,6 +2,7 @@ package it.uniroma3.radeon.sa.main;
 
 import it.uniroma3.radeon.sa.data.ClassificationResult;
 import it.uniroma3.radeon.sa.data.UnlabeledTweet;
+import it.uniroma3.radeon.sa.data.shared.accumulators.SentimentCountAccumulator;
 import it.uniroma3.radeon.sa.functions.FieldExtractFunction;
 import it.uniroma3.radeon.sa.functions.GetPairValueFunction;
 import it.uniroma3.radeon.sa.functions.PairToFunction;
@@ -11,12 +12,14 @@ import it.uniroma3.radeon.sa.functions.mappers.ClassificationMapper;
 import it.uniroma3.radeon.sa.functions.mappers.UnlabeledTweetMapper;
 import it.uniroma3.radeon.sa.functions.modifiers.VectorizerModifier;
 import it.uniroma3.radeon.sa.utils.Parsing;
+import it.uniroma3.radeon.sa.utils.PropertyLoader;
 
 import java.io.FileReader;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
+import org.apache.spark.Accumulator;
 import org.apache.spark.SparkConf;
 import org.apache.spark.mllib.classification.NaiveBayesModel;
 import org.apache.spark.mllib.feature.HashingTF;
@@ -26,20 +29,13 @@ import org.apache.spark.streaming.api.java.JavaPairDStream;
 import org.apache.spark.streaming.api.java.JavaStreamingContext;
 import org.apache.spark.streaming.kafka.KafkaUtils;
 
-public class ClassifyKafka {
+public class ClusterClassifyKafka {
 	
 	public static void main(String[] args) {
 		String configFile = args[0];
 		Integer timeout = Integer.parseInt(args[1]);
 		
-		Properties prop = new Properties();
-		try {
-			prop.load(new FileReader(configFile));
-		}
-		catch (Exception e) {
-			e.printStackTrace();
-			System.exit(1);
-		}
+		Properties prop = PropertyLoader.loadProperties(configFile);
 		
 		//Carica le regole di traduzione
 		Map<String, String> translationRules = Parsing.ruleParser(prop.get("translationRules").toString(), "=");
@@ -73,7 +69,7 @@ public class ClassifyKafka {
 		JavaDStream<UnlabeledTweet> vsmClassSet = normClassSet.map(new VectorizerModifier(htf));
 		
 		//Carica il modello di classificazione
-		NaiveBayesModel model = NaiveBayesModel.load(stsc.sparkContext().sc(), "file://" + conf.get("ModelInputDir"));
+		NaiveBayesModel model = NaiveBayesModel.load(stsc.sparkContext().sc(), "hdfs://" + conf.get("ModelInputDir"));
 		
 		//Classifica i tweet per sentimento utilizzando il modello
 		JavaDStream<ClassificationResult> classifiedSet = vsmClassSet.map(new ClassificationMapper(model));
@@ -83,11 +79,12 @@ public class ClassifyKafka {
 				                                                        .mapToPair(new PairToFunction<String, Integer>(1))
 				                                                        .reduceByKey(new SumReduceFunction());
 		
-//		Map<String, Integer> totals = new HashMap<>();
-//		sentiment2count.foreachRDD(new SumToMapAggregator(totals));
+		Accumulator<Map<String, Integer>> totals = 
+				stsc.sparkContext().accumulator(new HashMap<String, Integer>(), new SentimentCountAccumulator());
+		sentiment2count.foreachRDD(new SumToMapAggregator(totals));
 		
 		stsc.start();
 		stsc.awaitTerminationOrTimeout(timeout);
-//		System.out.println(totals);
+		System.out.println(totals.value());
 	}
 }

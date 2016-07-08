@@ -60,12 +60,12 @@ public class RedditModule implements Module {
 	public void run() {
 		this.bootstrap();
 		this.listen();
+		this.producer.close();
 	}
 
 	private void bootstrap() {
 		this.bootPosts();
 		this.bootComments();
-		this.producer.close();
 	}
 
 	private void listen() {

@@ -68,7 +68,8 @@ public class MongoCommentRepository implements CommentRepository {
 				WriteModel<Document> updateModel = new UpdateOneModel<Document>(queryDoc, updateQueryDoc);
 				bulkUpdateList.add(updateModel);
 			}
-			collection.bulkWrite(bulkUpdateList);
+			if (bulkUpdateList.size() > 0)
+				collection.bulkWrite(bulkUpdateList);
 
 		} catch (JsonProcessingException e) {
 			e.printStackTrace();
@@ -106,13 +107,15 @@ public class MongoCommentRepository implements CommentRepository {
 		Bson projection = elemMatch("comments.id");
 
 		Document commentDoc = collection.find(query).projection(projection).first();
-		String commentJson = commentDoc.toJson();
 
 		try {
-			JsonNode rootNode = mapper.readValue(commentJson, JsonNode.class);
-			JsonNode commentsNode = rootNode.get("comments");
-			Comment[] comments = mapper.readValue(commentsNode.traverse(), Comment[].class);
-			comment = comments[0];
+			if (commentDoc != null) {
+				String commentJson = commentDoc.toJson();
+				JsonNode rootNode = mapper.readValue(commentJson, JsonNode.class);
+				JsonNode commentsNode = rootNode.get("comments");
+				Comment[] comments = mapper.readValue(commentsNode.traverse(), Comment[].class);
+				comment = comments[0];
+			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

@@ -29,6 +29,7 @@ public class MongoRepositoryTest {
 		MongoRepositoryTest.mongoDataSource.getCollection("post").drop();
 		
 		List<Post> posts = new ArrayList<Post>(2);
+		List<Comment> comments = new ArrayList<Comment>(4);
 
 		Post post1 = new Post();
 		post1.setId("post1");
@@ -60,29 +61,39 @@ public class MongoRepositoryTest {
 		comment1.setId("comment1");
 		comment1.setBody("post1.comment1");
 		comment1.setPost(post1);
+		
+		comments.add(comment1);
 
-		MongoRepositoryTest.comment_repo.persistOne(comment1);
+		//MongoRepositoryTest.comment_repo.persistOne(comment1);
 
 		Comment comment2 = new Comment();
 		comment2.setId("comment2");
 		comment2.setBody("post1.comment2");
 		comment2.setPost(post1);
+		
+		comments.add(comment2);
 
-		MongoRepositoryTest.comment_repo.persistOne(comment2);
+		//MongoRepositoryTest.comment_repo.persistOne(comment2);
 
 		Comment comment3 = new Comment();
 		comment3.setId("comment3");
 		comment3.setBody("post2.comment3");
 		comment3.setPost(post2);
+		
+		comments.add(comment3);
 
-		MongoRepositoryTest.comment_repo.persistOne(comment3);
+		//MongoRepositoryTest.comment_repo.persistOne(comment3);
 
 		Comment comment4 = new Comment();
 		comment4.setId("comment4");
 		comment4.setBody("post2.comment4");
 		comment4.setPost(post2);
+		
+		comments.add(comment4);
 
-		MongoRepositoryTest.comment_repo.persistOne(comment4);
+		//MongoRepositoryTest.comment_repo.persistOne(comment4);
+		
+		MongoRepositoryTest.comment_repo.persistMany(comments);
 	}
 
 	@Test
@@ -136,6 +147,11 @@ public class MongoRepositoryTest {
 		Assert.assertEquals("fb", post3.getSrc());
 
 		Assert.assertEquals(post3.getComments().size(), 0);
+		
+		Post nullPost = this.post_repo.findPostById("pincopallino", true);
+		
+		Assert.assertNull(nullPost);
+		
 	}
 
 	@Test
@@ -148,6 +164,9 @@ public class MongoRepositoryTest {
 
 		Assert.assertEquals("comment3", comment3.getId());
 		Assert.assertEquals("post2.comment3", comment3.getBody());
+		
+		Comment nullComment = this.comment_repo.findCommentById("nullComment");
+		Assert.assertNull(nullComment);
 	}
 	
 	@Test

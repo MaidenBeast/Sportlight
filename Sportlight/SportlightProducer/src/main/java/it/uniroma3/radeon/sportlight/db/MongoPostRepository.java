@@ -61,7 +61,8 @@ public class MongoPostRepository implements PostRepository {
 
 			for (Post post : posts)
 				docs.add(Document.parse(mapper.writeValueAsString(post)));
-			collection.insertMany(docs);
+			if (docs.size() > 0)
+				collection.insertMany(docs);
 
 		} catch (JsonProcessingException e) {
 			e.printStackTrace();
@@ -85,7 +86,8 @@ public class MongoPostRepository implements PostRepository {
 
 		Document postDoc = collection.find(query).projection(projection).first();
 		try {
-			post = mapper.readValue(postDoc.toJson(), Post.class);
+			if (postDoc != null)
+				post = mapper.readValue(postDoc.toJson(), Post.class);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

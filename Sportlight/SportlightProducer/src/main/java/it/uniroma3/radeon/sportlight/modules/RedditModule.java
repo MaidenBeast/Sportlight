@@ -141,8 +141,8 @@ public class RedditModule implements Module {
 					postsToPush.add(postMapTemp.get(postId));
 
 				//DEBUG
-				System.out.println("ID dei nuovi commenti: "+fetchedPostIds);
-				System.out.println("ID dei commenti già presenti su Mongo: "+mongoPosts.keySet());
+				System.out.println("ID dei nuovi post: "+fetchedPostIds);
+				System.out.println("ID dei post già presenti su Mongo: "+mongoPosts.keySet());
 
 				if (postsToPush.size() > 0) //se ci stanno dei nuovi commenti
 					this.post_repo.persistMany(postsToPush); //salvo su Mongo tutti i post ancora non persistiti

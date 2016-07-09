@@ -3,7 +3,6 @@ package it.uniroma3.radeon.sportlight.modules;
 import static java.util.Arrays.asList;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -13,62 +12,37 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Set;
 
-import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.io.Resources;
 
 import it.uniroma3.radeon.sportlight.data.Comment;
 import it.uniroma3.radeon.sportlight.data.Post;
-import it.uniroma3.radeon.sportlight.db.CommentRepository;
-import it.uniroma3.radeon.sportlight.db.MongoCommentRepository;
-import it.uniroma3.radeon.sportlight.db.MongoPostRepository;
-import it.uniroma3.radeon.sportlight.db.PostRepository;
 
-public class RedditModule implements Module {
+public class RedditModule extends Module {
 	private static final String REDDIT_URL_TEMPLATE = "https://www.reddit.com/r/Euro2016/.json?sort=new&raw_json=1";
 	private static final String REDDIT_URL_POST_TEMPLATE = "https://www.reddit.com/r/Euro2016/comments/%s/new.json?sort=new&raw_json=1";
 	private static final String REDDIT_URL_NEW_COMMENTS = "https://www.reddit.com/r/Euro2016/comments.json";
 
 	private static final String MODIFIED_USER_AGENT = "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:46.0) Gecko/20100101 Firefox/46.0";
 
-	KafkaProducer<String, String> producer;
-
-	PostRepository post_repo;
-	CommentRepository comment_repo;
-
 	public RedditModule() {
-		try (InputStream props = Resources.getResource("producer.props").openStream()) {
-			Properties properties = new Properties();
-			properties.load(props);
-			producer = new KafkaProducer<>(properties);
-			post_repo = new MongoPostRepository();
-			comment_repo = new MongoCommentRepository();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		super();
 	}
-
+	
 	@Override
-	public void run() {
-		this.bootstrap();
-		this.listen();
-		this.producer.close();
-	}
-
-	private void bootstrap() {
+	protected void bootstrap() {
 		this.bootPosts();
 		this.bootComments();
 	}
-
-	private void listen() {
+	
+	@Override
+	protected void listen() {
 		URL urlComments = null;
 		ObjectMapper mapper = new ObjectMapper();
 		Map<String, JsonNode> newCommentsMap = new HashMap<String, JsonNode>();
@@ -185,7 +159,7 @@ public class RedditModule implements Module {
 		}
 	}
 
-	private void bootPosts() {
+	protected void bootPosts() {
 		Calendar cal = Calendar.getInstance();
 		cal.add(Calendar.YEAR, -1); //prendo la data dell'anno precedente
 		long prevYearTimeStamp = cal.getTime().getTime();

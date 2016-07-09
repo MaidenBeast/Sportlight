@@ -19,7 +19,7 @@ public class Post {
 		this.title = "";
 		this.body = "";
 		this.comments = new LinkedList<Comment>();
-		this.type = "type";
+		this.type = "post";
 	}
 
 	public String getId() {

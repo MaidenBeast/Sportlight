@@ -16,7 +16,7 @@ public class TestWordReducerBolt extends BaseRichBolt {
 	
 	private static final long serialVersionUID = 1L;
 	private OutputCollector collector;
-	private static Map<String, Integer> wordCounter;
+	private static Map<String, Integer> wordCounter = new HashMap<>();
 	
 	@Override
 	public void prepare(Map conf, TopologyContext context, OutputCollector collector) {
@@ -34,10 +34,11 @@ public class TestWordReducerBolt extends BaseRichBolt {
 		else {
 			wordCounter.put(word, count);
 		}
+		this.collector.emit(tuple, new Values(word, wordCounter.get(word)));
 	}
 
 	@Override
 	public void declareOutputFields(OutputFieldsDeclarer declarer) {
-		declarer.declare(new Fields("word", "count"));
+		declarer.declare(new Fields("word", "total"));
 	}
 }

@@ -21,6 +21,7 @@ public class SentimentCountAccumulator implements AccumulatorParam<Map<String, I
 				counts1.put(sentiment, newCount);
 			}
 		}
+		System.out.println(counts1);
 		return counts1;
 	}
 

@@ -30,7 +30,7 @@ public class SumToMapAggregator implements VoidFunction<JavaPairRDD<String, Inte
 						String key = tuple._1();
 						Integer newValue = tuple._2();
 						newCount.put(key, newValue);
-						acc.merge(newCount);
+						acc.add(newCount);
 					}
 				}
 		);

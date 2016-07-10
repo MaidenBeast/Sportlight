@@ -11,11 +11,18 @@ import it.uniroma3.radeon.sa.functions.aggregators.SumToMapAggregator;
 import it.uniroma3.radeon.sa.functions.mappers.ClassificationMapper;
 import it.uniroma3.radeon.sa.functions.mappers.UnlabeledTweetMapper;
 import it.uniroma3.radeon.sa.functions.modifiers.VectorizerModifier;
+
+import org.apache.spark.api.java.JavaPairRDD;
+import org.apache.spark.api.java.function.Function3;
+import org.apache.spark.api.java.function.VoidFunction;
+
 import it.uniroma3.radeon.sa.utils.Parsing;
 import it.uniroma3.radeon.sa.utils.PropertyLoader;
 
 import java.io.FileReader;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
@@ -24,10 +31,17 @@ import org.apache.spark.SparkConf;
 import org.apache.spark.mllib.classification.NaiveBayesModel;
 import org.apache.spark.mllib.feature.HashingTF;
 import org.apache.spark.streaming.Durations;
+import org.apache.spark.streaming.State;
+import org.apache.spark.streaming.StateSpec;
 import org.apache.spark.streaming.api.java.JavaDStream;
+import org.apache.spark.streaming.api.java.JavaMapWithStateDStream;
 import org.apache.spark.streaming.api.java.JavaPairDStream;
 import org.apache.spark.streaming.api.java.JavaStreamingContext;
 import org.apache.spark.streaming.kafka.KafkaUtils;
+
+import com.google.common.base.Optional;
+
+import scala.Tuple2;
 
 public class ClusterClassifyKafka {
 	
@@ -50,6 +64,12 @@ public class ClusterClassifyKafka {
 		
 		
 		JavaStreamingContext stsc = new JavaStreamingContext(conf, Durations.seconds(2));
+		stsc.checkpoint("s3://sportlightstorage/checkpointing");
+		
+		//Definizione dello stato iniziale
+		List<Tuple2<String, Integer>> tuples =
+        	Arrays.asList(new Tuple2<>("0.0", 0), new Tuple2<>("1.1", 0));
+		JavaPairRDD<String, Integer> initialRDD = stsc.sparkContext().parallelizePairs(tuples);
 		
 		Map<String, Integer> topics = new HashMap<>();
 		topics.put("tweets", 1);
@@ -62,6 +82,8 @@ public class ClusterClassifyKafka {
 				KafkaUtils.createStream(stsc, conf.get("ZKQuorum"), conf.get("ConsumerGroupID"), topics)
 				          .map(new GetPairValueFunction<String, String>());
 		
+//		listenedTweets.print();
+		
 		//Normalizza i tweet da classificare
 		JavaDStream<UnlabeledTweet> normClassSet = listenedTweets.map(new UnlabeledTweetMapper(",", translationRules));
 		
@@ -69,7 +91,7 @@ public class ClusterClassifyKafka {
 		JavaDStream<UnlabeledTweet> vsmClassSet = normClassSet.map(new VectorizerModifier(htf));
 		
 		//Carica il modello di classificazione
-		NaiveBayesModel model = NaiveBayesModel.load(stsc.sparkContext().sc(), "hdfs://" + conf.get("ModelInputDir"));
+		NaiveBayesModel model = NaiveBayesModel.load(stsc.sparkContext().sc(), "s3://" + conf.get("ModelInputDir"));
 		
 		//Classifica i tweet per sentimento utilizzando il modello
 		JavaDStream<ClassificationResult> classifiedSet = vsmClassSet.map(new ClassificationMapper(model));
@@ -79,12 +101,28 @@ public class ClusterClassifyKafka {
 				                                                        .mapToPair(new PairToFunction<String, Integer>(1))
 				                                                        .reduceByKey(new SumReduceFunction());
 		
-		Accumulator<Map<String, Integer>> totals = 
-				stsc.sparkContext().accumulator(new HashMap<String, Integer>(), new SentimentCountAccumulator());
-		sentiment2count.foreachRDD(new SumToMapAggregator(totals));
+		//Funzione di aggiornamento (nel refactor deve essere assolutamente tolta da qui)
+	    Function3<String, Optional<Integer>, State<Integer>, Tuple2<String, Integer>> updateFunc =
+	            new Function3<String, Optional<Integer>, State<Integer>, Tuple2<String, Integer>>() {
+	    	
+					private static final long serialVersionUID = 1L;
+
+				@Override
+	              public Tuple2<String, Integer> call(String sentiment, Optional<Integer> newCount,
+	                  State<Integer> prevCount) {
+					int sum = newCount.or(0) + (prevCount.exists() ? prevCount.get() : 0);
+	                Tuple2<String, Integer> output = new Tuple2<>(sentiment, sum);
+	                prevCount.update(sum);
+	                return output;
+	              }
+	            };
+		//Aggiorna lo stato precedente
+		JavaMapWithStateDStream<String, Integer, Integer, Tuple2<String, Integer>> totals = 
+				sentiment2count.mapWithState(StateSpec.function(updateFunc).initialState(initialRDD));
+		
+		totals.print();
 		
 		stsc.start();
 		stsc.awaitTerminationOrTimeout(timeout);
-		System.out.println(totals.value());
 	}
 }

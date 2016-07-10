@@ -61,7 +61,8 @@ public class MongoPostRepository implements PostRepository {
 
 			for (Post post : posts)
 				docs.add(Document.parse(mapper.writeValueAsString(post)));
-			collection.insertMany(docs);
+			if (docs.size() > 0)
+				collection.insertMany(docs);
 
 		} catch (JsonProcessingException e) {
 			e.printStackTrace();
@@ -85,7 +86,8 @@ public class MongoPostRepository implements PostRepository {
 
 		Document postDoc = collection.find(query).projection(projection).first();
 		try {
-			post = mapper.readValue(postDoc.toJson(), Post.class);
+			if (postDoc != null)
+				post = mapper.readValue(postDoc.toJson(), Post.class);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -145,37 +147,6 @@ public class MongoPostRepository implements PostRepository {
 	@Override
 	public Map<String, Post> findAllPosts(boolean alsoComments) {
 		return this.findAllPostsBySrcs(null, alsoComments);
-		/*final Map<String, Post> postMap = new HashMap<String, Post>();
-
-		final ObjectMapper mapper = new ObjectMapper();
-		MongoCollection<Document> collection = this.mongoDataSource.getCollection("post");
-
-		List<String> excludeFields = new LinkedList<>();
-		excludeFields.add("_id"); //intanto escludo il campo _id
-
-		if (!alsoComments) //nel caso in cui io non voglia i commenti
-			excludeFields.add("comments"); //escludi pure il campo "comments"
-
-		Bson projection = exclude(excludeFields); //proiezione per esclusione
-
-		MongoCursor<Document> cursor = collection.find().projection(projection).iterator();
-		try {
-			while (cursor.hasNext()) {
-				Document document = cursor.next();
-				Post post = mapper.readValue(document.toJson(), Post.class);
-				postMap.put(post.getId(), post);
-			}
-		} catch (JsonParseException e) {
-			e.printStackTrace();
-		} catch (JsonMappingException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		} finally {
-			cursor.close();
-		}
-
-		return postMap;*/
 	}
 
 	@Override

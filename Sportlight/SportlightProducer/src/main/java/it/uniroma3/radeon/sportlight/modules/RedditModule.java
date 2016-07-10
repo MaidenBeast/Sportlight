@@ -3,7 +3,6 @@ package it.uniroma3.radeon.sportlight.modules;
 import static java.util.Arrays.asList;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -13,66 +12,158 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Set;
 
-import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.io.Resources;
 
 import it.uniroma3.radeon.sportlight.data.Comment;
 import it.uniroma3.radeon.sportlight.data.Post;
-import it.uniroma3.radeon.sportlight.db.CommentRepository;
-import it.uniroma3.radeon.sportlight.db.MongoCommentRepository;
-import it.uniroma3.radeon.sportlight.db.MongoPostRepository;
-import it.uniroma3.radeon.sportlight.db.PostRepository;
+import it.uniroma3.radeon.sportlight.data.State;
 
-public class RedditModule implements Module {
+public class RedditModule extends Module {
 	private static final String REDDIT_URL_TEMPLATE = "https://www.reddit.com/r/Euro2016/.json?sort=new&raw_json=1";
 	private static final String REDDIT_URL_POST_TEMPLATE = "https://www.reddit.com/r/Euro2016/comments/%s/new.json?sort=new&raw_json=1";
 	private static final String REDDIT_URL_NEW_COMMENTS = "https://www.reddit.com/r/Euro2016/comments.json";
 
 	private static final String MODIFIED_USER_AGENT = "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:46.0) Gecko/20100101 Firefox/46.0";
-
-	KafkaProducer<String, String> producer;
-
-	PostRepository post_repo;
-	CommentRepository comment_repo;
+	
+	private State redditState;
 
 	public RedditModule() {
-		try (InputStream props = Resources.getResource("producer.props").openStream()) {
-			Properties properties = new Properties();
-			properties.load(props);
-			producer = new KafkaProducer<>(properties);
-			post_repo = new MongoPostRepository();
-			comment_repo = new MongoCommentRepository();
-		} catch (IOException e) {
-			e.printStackTrace();
+		super();
+		this.redditState = this.state_repo.getStateBySrc("reddit");
+	}
+	
+	@Override
+	protected void bootstrap() {
+		this.bootPosts();
+		this.bootComments();
+	}
+	
+	@Override
+	protected void listen() {
+		URL urlComments = null;
+		ObjectMapper mapper = new ObjectMapper();
+		Map<String, JsonNode> newCommentsMap = new HashMap<String, JsonNode>();
+
+		while (true) { //loop infinito (per lo streaming
+			try {
+				urlComments = new URL(REDDIT_URL_NEW_COMMENTS);
+				URLConnection connComments = urlComments.openConnection();
+
+				//workaround per l'errore HTTP 429 (Too Many Requests)
+				connComments.setRequestProperty("User-Agent", MODIFIED_USER_AGENT);
+
+				System.out.println("\nGetting Reddit data from "+urlComments.toURI());
+
+				JsonNode jsonRoot = mapper.readTree(connComments.getInputStream());
+				JsonNode jsonData = jsonRoot.get("data");
+				JsonNode jsonChildren = jsonData.get("children");
+				
+				newCommentsMap.clear(); ///svuota la mappa
+				
+				//itera per leggere tutti i commenti
+				for (JsonNode jsonChild : jsonChildren) {
+					JsonNode jsonChildData = jsonChild.get("data");
+					String commentId = "reddit_"+jsonChildData.get("name").asText();
+					//ogno commento lo mappo per id commento
+					newCommentsMap.put(commentId, jsonChildData);
+				}
+				
+				Set<String> newCommentsIds = newCommentsMap.keySet();
+				//intanto verifico quali sono i commenti presenti già su MongoDB
+				Map<String, Comment> mongoComments = this.comment_repo.findCommentsByIds(newCommentsIds);
+				
+				//differenza insiemistica tra gli id dei nuovi commenti scaricati ora da reddit e quelli già presenti su Mongo
+				newCommentsIds.removeAll(mongoComments.keySet());
+				
+				List<Comment> commentsToPush = new ArrayList<Comment>(newCommentsIds.size());
+
+				for (String commentId : newCommentsIds) {
+					JsonNode commentNode = newCommentsMap.get(commentId);
+					Comment newComment = new Comment();
+					
+					newComment.setId("reddit_"+commentNode.get("name").asText());
+					String bodyComment = commentNode.get("body").asText();
+					newComment.setBody(bodyComment);
+					
+					//per controlla se pure il post è già presente su Mongo...
+					String postId = commentNode.get("link_id").asText();
+					Post post = post_repo.findPostById("reddit_"+postId, false);
+
+					/*
+					 * se il commento fa riferimento a un nuovo post:
+					 * 	- effettua il fetch da reddit del post
+					 * 	- persistilo (assieme al nuovo comment) su Mongo
+					 */
+					if (post == null) {
+						Thread.sleep(1000); //intanto meglio aspettare un altro secondo
+						String postIdSub = postId.substring(postId.lastIndexOf("_")+1);
+						String postUrl = String.format(REDDIT_URL_POST_TEMPLATE, postIdSub);
+
+						URL urlPost = new URL(postUrl);
+						URLConnection connPost = urlPost.openConnection();
+
+						//workaround per l'errore HTTP 429 (Too Many Requests)
+						connPost.setRequestProperty("User-Agent", MODIFIED_USER_AGENT);
+
+						System.out.println("\nGetting Reddit data from "+urlPost.toURI());
+
+						JsonNode jsonRootPost = mapper.readTree(connPost.getInputStream());
+						JsonNode jsonPost = jsonRootPost.get(0).get("data");
+
+						JsonNode jsonPostChildren = jsonPost.get("children");
+						JsonNode jsonPostChildrenData = jsonPostChildren.get(0).get("data");
+
+						String selftext = jsonPostChildrenData.get("selftext").asText();
+						String title = jsonPostChildrenData.get("title").asText();
+
+						post = new Post();
+						post.setId("reddit_"+postId);
+						post.setSrc("reddit");
+						post.setTitle(title);
+						post.setBody(selftext);
+						post.addComment(newComment);
+						
+						//System.out.println(mapper.writeValueAsString(post));
+						
+						this.post_repo.persistOne(post);
+						
+					} else { //altrimenti aggiungi il commento tra quelli da persistere tutt'assieme su Mongo
+						newComment.setPost(post);
+						commentsToPush.add(newComment);
+					}
+					//System.out.println(mapper.writeValueAsString(newComment));
+					//invio il commento al topic "sportlight" di Kafka
+					producer.send(new ProducerRecord<String, String>("sportlight", mapper.writeValueAsString(newComment)));
+				}
+				
+				//DEBUG
+				System.out.println("ID dei nuovi commenti: "+newCommentsIds);
+				System.out.println("ID dei commenti già presenti su Mongo: "+mongoComments.keySet());
+				
+				if (commentsToPush.size() > 0) //se ci stanno dei commenti da persistere
+					this.comment_repo.persistMany(commentsToPush); //salvo su Mongo tutti i commenti ancora non persistiti
+				
+				Thread.sleep(1000); //ascolta ogni secondo
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			} catch (MalformedURLException e) {
+				e.printStackTrace();
+			} catch (IOException e) {
+				e.printStackTrace();
+			} catch (URISyntaxException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 
-	@Override
-	public void run() {
-		this.bootstrap();
-		this.listen();
-	}
-
-	private void bootstrap() {
-		this.bootPosts();
-		this.bootComments();
-		this.producer.close();
-	}
-
-	private void listen() {
-
-	}
-
-	private void bootPosts() {
+	protected void bootPosts() {
 		Calendar cal = Calendar.getInstance();
 		cal.add(Calendar.YEAR, -1); //prendo la data dell'anno precedente
 		long prevYearTimeStamp = cal.getTime().getTime();
@@ -109,11 +200,9 @@ public class RedditModule implements Module {
 
 					long createTime = jsonChildData.get("created").asLong()*1000;
 
-					//se il post è stato pubblicato un'anno fa, allora blocca entrambi i cicli
-					if (createTime < prevYearTimeStamp) {
+					//se il post è stato pubblicato un'anno fa, allora blocca il ciclo esterno
+					if (createTime < prevYearTimeStamp)
 						toIterate = false;
-						break;
-					}
 
 					Post post = new Post();
 					post.setId("reddit_"+
@@ -124,8 +213,10 @@ public class RedditModule implements Module {
 
 					postMapTemp.put(post.getId(), post);
 
-					System.out.println(mapper.writeValueAsString(post));
-					//producer.send(new ProducerRecord<String, String>("sportlight",mapper.writeValueAsString(post)));
+					String jsonPost = mapper.writeValueAsString(post);
+					
+					//System.out.println(jsonPost); //DEBUG
+					producer.send(new ProducerRecord<String, String>("sportlight",jsonPost));
 
 				}
 
@@ -141,10 +232,10 @@ public class RedditModule implements Module {
 					postsToPush.add(postMapTemp.get(postId));
 
 				//DEBUG
-				System.out.println("ID dei nuovi commenti: "+fetchedPostIds);
-				System.out.println("ID dei commenti già presenti su Mongo: "+mongoPosts.keySet());
+				System.out.println("ID dei nuovi post: "+fetchedPostIds);
+				System.out.println("ID dei post già presenti su Mongo: "+mongoPosts.keySet());
 
-				if (postsToPush.size() > 0) //se ci stanno dei nuovi commenti
+				if (postsToPush.size() > 0) //se ci stanno dei nuovi post
 					this.post_repo.persistMany(postsToPush); //salvo su Mongo tutti i post ancora non persistiti
 
 			} catch (MalformedURLException e) {
@@ -204,9 +295,9 @@ public class RedditModule implements Module {
 					System.out.println("Selftext: "+selftext);
 				}*/
 
-				for (Comment comment : commentsMap.values()) { //per ogni commento
+				/*for (Comment comment : commentsMap.values()) { //per ogni commento
 					System.out.println(mapper.writeValueAsString(comment)); //debug
-				}
+				}*/
 
 				if (commentsMap.size() > 0) { //sono presenti dei commenti
 					Set<String> fetchedCommentsIds = commentsMap.keySet();
@@ -262,7 +353,7 @@ public class RedditModule implements Module {
 			if (jsonCommentChildDataBody != null) {
 
 				Comment comment = new Comment();
-				comment.setId(jsonCommentChildData.get("name").asText());
+				comment.setId("reddit_"+jsonCommentChildData.get("name").asText());
 				String bodyComment = jsonCommentChildData.get("body").asText();
 				comment.setBody(bodyComment);
 				comment.setPost(post);

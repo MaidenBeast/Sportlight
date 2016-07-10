@@ -23,6 +23,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import it.uniroma3.radeon.sportlight.data.Comment;
 import it.uniroma3.radeon.sportlight.data.Post;
+import it.uniroma3.radeon.sportlight.data.State;
 
 public class RedditModule extends Module {
 	private static final String REDDIT_URL_TEMPLATE = "https://www.reddit.com/r/Euro2016/.json?sort=new&raw_json=1";
@@ -30,9 +31,12 @@ public class RedditModule extends Module {
 	private static final String REDDIT_URL_NEW_COMMENTS = "https://www.reddit.com/r/Euro2016/comments.json";
 
 	private static final String MODIFIED_USER_AGENT = "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:46.0) Gecko/20100101 Firefox/46.0";
+	
+	private State redditState;
 
 	public RedditModule() {
 		super();
+		this.redditState = this.state_repo.getStateBySrc("reddit");
 	}
 	
 	@Override
@@ -126,7 +130,7 @@ public class RedditModule extends Module {
 						post.setBody(selftext);
 						post.addComment(newComment);
 						
-						System.out.println(mapper.writeValueAsString(post));
+						//System.out.println(mapper.writeValueAsString(post));
 						
 						this.post_repo.persistOne(post);
 						
@@ -134,7 +138,7 @@ public class RedditModule extends Module {
 						newComment.setPost(post);
 						commentsToPush.add(newComment);
 					}
-					System.out.println(mapper.writeValueAsString(newComment));
+					//System.out.println(mapper.writeValueAsString(newComment));
 					//invio il commento al topic "sportlight" di Kafka
 					producer.send(new ProducerRecord<String, String>("sportlight", mapper.writeValueAsString(newComment)));
 				}
@@ -196,11 +200,9 @@ public class RedditModule extends Module {
 
 					long createTime = jsonChildData.get("created").asLong()*1000;
 
-					//se il post è stato pubblicato un'anno fa, allora blocca entrambi i cicli
-					if (createTime < prevYearTimeStamp) {
+					//se il post è stato pubblicato un'anno fa, allora blocca il ciclo esterno
+					if (createTime < prevYearTimeStamp)
 						toIterate = false;
-						break;
-					}
 
 					Post post = new Post();
 					post.setId("reddit_"+
@@ -211,8 +213,10 @@ public class RedditModule extends Module {
 
 					postMapTemp.put(post.getId(), post);
 
-					System.out.println(mapper.writeValueAsString(post));
-					//producer.send(new ProducerRecord<String, String>("sportlight",mapper.writeValueAsString(post)));
+					String jsonPost = mapper.writeValueAsString(post);
+					
+					//System.out.println(jsonPost); //DEBUG
+					producer.send(new ProducerRecord<String, String>("sportlight",jsonPost));
 
 				}
 
@@ -291,9 +295,9 @@ public class RedditModule extends Module {
 					System.out.println("Selftext: "+selftext);
 				}*/
 
-				for (Comment comment : commentsMap.values()) { //per ogni commento
+				/*for (Comment comment : commentsMap.values()) { //per ogni commento
 					System.out.println(mapper.writeValueAsString(comment)); //debug
-				}
+				}*/
 
 				if (commentsMap.size() > 0) { //sono presenti dei commenti
 					Set<String> fetchedCommentsIds = commentsMap.keySet();

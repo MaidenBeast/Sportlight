@@ -6,10 +6,10 @@ import it.uniroma3.radeon.sa.functions.FieldExtractFunction;
 import it.uniroma3.radeon.sa.functions.GetPairValueFunction;
 import it.uniroma3.radeon.sa.functions.PairToFunction;
 import it.uniroma3.radeon.sa.functions.SumReduceFunction;
-import it.uniroma3.radeon.sa.functions.aggregators.SumToMapAggregator;
 import it.uniroma3.radeon.sa.functions.mappers.ClassificationMapper;
 import it.uniroma3.radeon.sa.functions.mappers.UnlabeledTweetMapper;
 import it.uniroma3.radeon.sa.functions.modifiers.VectorizerModifier;
+import it.uniroma3.radeon.sa.functions.stateful.SumToMapAggregator;
 import it.uniroma3.radeon.sa.utils.Parsing;
 
 import java.io.FileReader;

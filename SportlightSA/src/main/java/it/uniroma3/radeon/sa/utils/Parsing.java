@@ -31,6 +31,18 @@ public class Parsing {
 		}
 	}
 	
+	public static Map<String, Object> parseTextToMap(String text, String kvSeparator, String tupleSeparator) {
+		Map<String, Object> key2value = new HashMap<>();
+		String[] tuples = text.split(tupleSeparator);
+		for (String tuple : tuples) {
+			String[] keyAndValue = tuple.split(kvSeparator);
+			String key = keyAndValue[0];
+			String value = keyAndValue[1];
+			key2value.put(key, value);
+		}
+		return key2value;
+	}
+	
 	public static List<String> parseToList(List<String> model, String inputFile) {
 		if (model.size() > 0) {
 			model.clear();

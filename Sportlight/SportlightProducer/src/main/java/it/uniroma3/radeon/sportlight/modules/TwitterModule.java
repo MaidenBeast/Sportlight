@@ -3,19 +3,24 @@ package it.uniroma3.radeon.sportlight.modules;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 
+import twitter4j.FilterQuery;
 import twitter4j.Query;
 import twitter4j.QueryResult;
-import twitter4j.RateLimitStatus;
+import twitter4j.StallWarning;
 import twitter4j.Status;
+import twitter4j.StatusDeletionNotice;
+import twitter4j.StatusListener;
 import twitter4j.Twitter;
 import twitter4j.TwitterException;
 import twitter4j.TwitterFactory;
-import twitter4j.auth.OAuthAuthorization;
+import twitter4j.TwitterStream;
+import twitter4j.TwitterStreamFactory;
 import twitter4j.conf.Configuration;
 import twitter4j.conf.ConfigurationBuilder;
 
@@ -44,7 +49,6 @@ public class TwitterModule extends Module {
 	@Override
 	protected void bootstrap() {
 		this.bootTweets();
-		this.bootRetweets();
 	}
 	
 	private void bootTweets() {
@@ -107,46 +111,87 @@ public class TwitterModule extends Module {
 			e.printStackTrace();
 		}
 	}
-	
-	private void bootRetweets() {
-		for (Long toGetRetweetsId : this.toGetRetweetsIds) {
-			List<Status> retweets;
-			try {
-				retweets = twitter.getRetweets(toGetRetweetsId);
-				for (Status retweet : retweets) { //retweets (da trattare come Comment)
-					if (retweet.getLang().equals("en")) //prendo solo i retweet in lingua inglese
-						System.out.println("[id: "+String.valueOf(retweet.getId())+
-											", text: "+ retweet.getText()+
-											", created_at: "+ retweet.getCreatedAt() +"]");
-				}
-				int remaining = this.twitter.getRateLimitStatus()
-						.get("/statuses/retweets/:id")
-						.getRemaining();
-				
-				int secondsUntilReset = this.twitter.getRateLimitStatus()
-						.get("/statuses/retweets/:id")
-						.getSecondsUntilReset();
-				
-				int secondsToWait = secondsUntilReset/remaining;
-				
-				Thread.sleep(secondsToWait*1000);
-			} catch (TwitterException e) {
-				e.printStackTrace();
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-		}
-	}
 
 	@Override
 	protected void listen() {
-		// TODO Auto-generated method stub
+		//intanto creo il thread per il bootstrap (contemporaneo) dei retweet
+		Thread retweetThread = new Thread() {
+			public void run() { //bootRetweets
+				for (Long toGetRetweetsId : toGetRetweetsIds) {
+					List<Status> retweets;
+					try {
+						retweets = twitter.getRetweets(toGetRetweetsId);
+						for (Status retweet : retweets) { //retweets (da trattare come Comment)
+							if (retweet.getLang().equals("en")) //prendo solo i retweet in lingua inglese
+								System.out.println("[id: "+String.valueOf(retweet.getId())+
+													", text: "+ retweet.getText()+
+													", created_at: "+ retweet.getCreatedAt() +"]");
+						}
+						int remaining = twitter.getRateLimitStatus()
+								.get("/statuses/retweets/:id")
+								.getRemaining();
+						
+						int secondsUntilReset = twitter.getRateLimitStatus()
+								.get("/statuses/retweets/:id")
+								.getSecondsUntilReset();
+						
+						int secondsToWait = secondsUntilReset/remaining;
+						
+						Thread.sleep(secondsToWait*1000);
+					} catch (TwitterException e) {
+						e.printStackTrace();
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+				}
+			}
+		};
+		
+		retweetThread.start();
 
+		//e intanto vado a prendere pure i nuovi tweet
+		TwitterStream twitterStream = new TwitterStreamFactory(this.getConfiguration()).getInstance();
+
+		StatusListener listener = new StatusListener() {
+
+			public void onStatus(Status status) {
+				Long status_id = status.getId();
+
+				if (status.getLang().equals("en")) //prendo solo i tweet in lingua inglese
+					System.out.println("Tweet \"nuovo\" ==> [id: "+String.valueOf(status_id)+
+							", text: "+ status.getText()+
+							", created_at: ]"+ status.getCreatedAt());
+			}
+
+			public void onTrackLimitationNotice(int arg0) {}
+
+			public void onStallWarning(StallWarning arg0) {}
+
+			public void onScrubGeo(long arg0, long arg1) {}
+
+			public void onDeletionNotice(StatusDeletionNotice arg0) {}
+			
+			public void onException(Exception ex) {
+				ex.printStackTrace();
+			}
+
+		};
+		
+		List<String> queries = new ArrayList<String>();
+		queries.add(query.getQuery());
+		
+		twitterStream.addListener(listener);
+		
+		String[] trackQueries = (String[]) queries.toArray(new String[queries.size()]);
+
+		FilterQuery filterQuery = new FilterQuery();
+		twitterStream.filter(filterQuery.track(trackQueries));
+		
 	}
 	
-	private OAuthAuthorization getAuth() {
+	/*private OAuthAuthorization getAuth() {
 		return new OAuthAuthorization(this.getConfiguration());
-	}
+	}*/
 
 	private Configuration getConfiguration() {
 		return new ConfigurationBuilder().setOAuthConsumerKey(CONSUMER_KEY)

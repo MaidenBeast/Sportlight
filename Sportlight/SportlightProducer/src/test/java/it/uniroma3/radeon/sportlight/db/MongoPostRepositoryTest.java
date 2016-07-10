@@ -15,18 +15,18 @@ import it.uniroma3.radeon.sportlight.data.Comment;
 import it.uniroma3.radeon.sportlight.data.Post;
 import it.uniroma3.radeon.sportlight.db.mongo.MongoDataSource;
 
-public class MongoRepositoryTest {
+public class MongoPostRepositoryTest {
 	private static MongoDataSource mongoDataSource;
 	private static PostRepository post_repo;
 	private static CommentRepository comment_repo;
 
 	@BeforeClass
 	public static void setUp() throws Exception {
-		MongoRepositoryTest.post_repo = new MongoPostRepository();
-		MongoRepositoryTest.comment_repo = new MongoCommentRepository();
-		MongoRepositoryTest.mongoDataSource = new MongoDataSource();
+		MongoPostRepositoryTest.post_repo = new MongoPostRepository();
+		MongoPostRepositoryTest.comment_repo = new MongoCommentRepository();
+		MongoPostRepositoryTest.mongoDataSource = new MongoDataSource();
 		
-		MongoRepositoryTest.mongoDataSource.getCollection("post").drop();
+		MongoPostRepositoryTest.mongoDataSource.getCollection("post").drop();
 		
 		List<Post> posts = new ArrayList<Post>(2);
 		List<Comment> comments = new ArrayList<Comment>(4);
@@ -55,7 +55,7 @@ public class MongoRepositoryTest {
 
 		posts.add(post3);
 
-		MongoRepositoryTest.post_repo.persistMany(posts);
+		MongoPostRepositoryTest.post_repo.persistMany(posts);
 
 		Comment comment1 = new Comment();
 		comment1.setId("comment1");
@@ -93,7 +93,7 @@ public class MongoRepositoryTest {
 
 		//MongoRepositoryTest.comment_repo.persistOne(comment4);
 		
-		MongoRepositoryTest.comment_repo.persistMany(comments);
+		MongoPostRepositoryTest.comment_repo.persistMany(comments);
 	}
 
 	@Test

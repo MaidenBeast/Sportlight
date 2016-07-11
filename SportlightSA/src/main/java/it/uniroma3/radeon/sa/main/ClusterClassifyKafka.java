@@ -19,6 +19,7 @@ import org.apache.spark.api.java.function.VoidFunction;
 
 import it.uniroma3.radeon.sa.utils.Parsing;
 import it.uniroma3.radeon.sa.utils.PropertyLoader;
+import it.uniroma3.radeon.sa.utils.StateMaker;
 
 import java.io.FileReader;
 import java.util.Arrays;
@@ -52,7 +53,6 @@ public class ClusterClassifyKafka {
 		
 		Properties prop = PropertyLoader.loadProperties(configFile);
 		
-		//Carica le regole di traduzione
 		SparkConf conf = new SparkConf().setAppName("Sentiment Analysis classifier")
 										.set("NormRules", prop.get("normRules").toString())
 										.set("ModelInputDir", prop.get("modelInputDir").toString())
@@ -60,21 +60,20 @@ public class ClusterClassifyKafka {
 		                                .set("ConsumerGroupID", prop.get("consumerGroupID").toString())
 		                                .set("Topics", prop.get("topicList").toString());
 		
+		//Carica le regole di traduzione
 		Map<String, String> normRules = Parsing.ruleParser(conf.get("NormRules"), "=");
 		
+		//Carica i topic da consumare
+		Map<String, Integer> topics = Parsing.parseTopics(conf.get("Topics"), ",", "/");
 		
 		JavaStreamingContext stsc = new JavaStreamingContext(conf, Durations.seconds(2));
 		stsc.checkpoint("s3://sportlightstorage/checkpointing");
 		
-		Map<String, Integer> topics = Parsing.parseTopics(conf.get("Topics"), ",", "/");
-		
 		//Definizione dello stato iniziale
-		List<Tuple2<String, Long>> tuples =
-        	Arrays.asList(new Tuple2<>("neg", 0L), new Tuple2<>("pos", 0L));
-		JavaPairRDD<String, Long> initialRDD = stsc.sparkContext().parallelizePairs(tuples);
-		
-//		Map<String, Integer> topics = new HashMap<>();
-//		topics.put("tweets", 1);
+		JavaPairRDD<String, Long> initialRDD = new StateMaker<Long>(stsc.sparkContext())
+				                                   .setInitialEntry("neg", 0L)
+				                                   .setInitialEntry("pos", 0L)
+				                                   .makeState();
 		
 		//Crea un convertitore che traduca ogni tweet in una rappresentazione vettoriale
 		HashingTF htf = new HashingTF(1000);

@@ -48,8 +48,6 @@ public class TrendAnalysis {
 		stsc.checkpoint("s3://sportlightstorage/checkpointing");
 		
 		Map<String, Integer> topics = Parsing.parseTopics(conf.get("Topics"), ",", "/");
-//		Map<String, Integer> topics = new HashMap<>();
-//		topics.put("tweets", 1);
 		
 		//Crea uno stream di post dalla coda Kafka
 		JavaDStream<Post> listenedPosts =

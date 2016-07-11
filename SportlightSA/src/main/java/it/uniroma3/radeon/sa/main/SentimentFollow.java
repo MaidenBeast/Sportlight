@@ -18,6 +18,7 @@ import it.uniroma3.radeon.sa.functions.stateful.StatefulAggregator;
 import it.uniroma3.radeon.sa.functions.stateful.SumAggregator;
 import it.uniroma3.radeon.sa.utils.Parsing;
 import it.uniroma3.radeon.sa.utils.PropertyLoader;
+import it.uniroma3.radeon.sa.utils.StateMaker;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -63,9 +64,10 @@ public class SentimentFollow {
 		stsc.checkpoint("s3://sportlightstorage/checkpointing");
 		
 		//Definizione dello stato iniziale
-		List<Tuple2<String, Long>> tuples =
-        	Arrays.asList(new Tuple2<>("0.0", 0L), new Tuple2<>("1.0", 0L));
-		JavaPairRDD<String, Long> initialRDD = stsc.sparkContext().parallelizePairs(tuples);
+		JavaPairRDD<String, Long> initialRDD = new StateMaker<Long>(stsc.sparkContext())
+				                                   .setInitialEntry("neg", 0L)
+				                                   .setInitialEntry("pos", 0L)
+				                                   .makeState();
 		
 		Map<String, Integer> topics = Parsing.parseTopics(conf.get("Topics"), ",", "/");
 		

@@ -19,7 +19,12 @@ public class ClassificationMapper extends RDDMapper<UnlabeledTweet, Classificati
 		Double predictedLabel = this.model.predict(unlabeled.getVsm());
 		ClassificationResult labeled = new ClassificationResult();
 		labeled.setText(unlabeled.getText());
-		labeled.setSentiment(predictedLabel.toString());
+		if (predictedLabel == 0.0) {
+			labeled.setSentiment("neg");
+		}
+		else {
+			labeled.setSentiment("pos");
+		}
 		return labeled;
 	}
 }

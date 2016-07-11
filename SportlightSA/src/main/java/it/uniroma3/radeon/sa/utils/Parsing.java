@@ -31,13 +31,26 @@ public class Parsing {
 		}
 	}
 	
-	public static Map<String, Object> parseTextToMap(String text, String kvSeparator, String tupleSeparator) {
-		Map<String, Object> key2value = new HashMap<>();
+	public static Map<String, Integer> parseTopics(String text, String kvSeparator, String tupleSeparator) {
+		Map<String, Integer> key2value = new HashMap<>();
 		String[] tuples = text.split(tupleSeparator);
 		for (String tuple : tuples) {
 			String[] keyAndValue = tuple.split(kvSeparator);
 			String key = keyAndValue[0];
-			String value = keyAndValue[1];
+			Integer value = Integer.parseInt(keyAndValue[1]);
+			key2value.put(key, value);
+		}
+		return key2value;
+	}
+	
+	@SuppressWarnings("unchecked")
+	public static <T> Map<String, T> parseTextToMap(String text, String kvSeparator, String tupleSeparator) {
+		Map<String, T> key2value = new HashMap<>();
+		String[] tuples = text.split(tupleSeparator);
+		for (String tuple : tuples) {
+			String[] keyAndValue = tuple.split(kvSeparator);
+			String key = keyAndValue[0];
+			T value = (T) keyAndValue[1];
 			key2value.put(key, value);
 		}
 		return key2value;

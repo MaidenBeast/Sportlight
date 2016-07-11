@@ -67,8 +67,7 @@ public class SentimentFollow {
         	Arrays.asList(new Tuple2<>("0.0", 0L), new Tuple2<>("1.0", 0L));
 		JavaPairRDD<String, Long> initialRDD = stsc.sparkContext().parallelizePairs(tuples);
 		
-		Map<String, Integer> topics = new HashMap<>();
-		topics.put("tweets", 1);
+		Map<String, Integer> topics = Parsing.parseTopics(conf.get("Topics"), ",", "/");
 		
 		//Crea uno stream di post e commenti dalla coda Kafka
 		JavaDStream<Post> listenedPosts =

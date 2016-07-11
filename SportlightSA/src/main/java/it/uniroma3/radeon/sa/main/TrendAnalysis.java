@@ -5,10 +5,13 @@ import it.uniroma3.radeon.sa.functions.FieldExtractFunction;
 import it.uniroma3.radeon.sa.functions.FlattenFunction;
 import it.uniroma3.radeon.sa.functions.GetPairValueFunction;
 import it.uniroma3.radeon.sa.functions.PairToFunction;
+import it.uniroma3.radeon.sa.functions.ReversePairFunction;
+import it.uniroma3.radeon.sa.functions.StreamingSortFunction;
 import it.uniroma3.radeon.sa.functions.SumReduceFunction;
 import it.uniroma3.radeon.sa.functions.mappers.PostMapper;
 import it.uniroma3.radeon.sa.functions.stateful.StatefulAggregator;
 import it.uniroma3.radeon.sa.functions.stateful.SumAggregator;
+import it.uniroma3.radeon.sa.utils.Parsing;
 import it.uniroma3.radeon.sa.utils.PropertyLoader;
 
 import java.util.HashMap;
@@ -44,8 +47,9 @@ public class TrendAnalysis {
 		JavaStreamingContext stsc = new JavaStreamingContext(conf, Durations.seconds(2));
 		stsc.checkpoint("s3://sportlightstorage/checkpointing");
 		
-		Map<String, Integer> topics = new HashMap<>();
-		topics.put("tweets", 1);
+		Map<String, Integer> topics = Parsing.parseTopics(conf.get("Topics"), ",", "/");
+//		Map<String, Integer> topics = new HashMap<>();
+//		topics.put("tweets", 1);
 		
 		//Crea uno stream di post dalla coda Kafka
 		JavaDStream<Post> listenedPosts =
@@ -64,10 +68,10 @@ public class TrendAnalysis {
 		//Aggiorna lo stato precedente e ordina per conteggio
 		JavaMapWithStateDStream<String, Long, Long, Tuple2<String, Long>> totals = 
 				topic2count.mapWithState(StateSpec.function(updateFunction));
-//				           .map(new ReversePairFunction())
-//				           .sortByKey()
-//				           .map(new ReversePairFunction());
 		
+//		JavaPairDStream<String, Long> orderedTotals = totals.mapToPair(new ReversePairFunction<String, Long>())
+//				                                            .transformToPair(new StreamingSortFunction<Long, String>())
+//				                                            .mapToPair(new ReversePairFunction<Long, String>());
 		//Automaticamente questa stampa prenderà i primi 10 elementi di totals
 		totals.print();
 		

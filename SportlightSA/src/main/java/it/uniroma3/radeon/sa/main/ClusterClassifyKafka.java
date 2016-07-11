@@ -10,6 +10,7 @@ import it.uniroma3.radeon.sa.functions.SumReduceFunction;
 import it.uniroma3.radeon.sa.functions.mappers.ClassificationMapper;
 import it.uniroma3.radeon.sa.functions.mappers.UnlabeledTweetMapper;
 import it.uniroma3.radeon.sa.functions.modifiers.VectorizerModifier;
+import it.uniroma3.radeon.sa.functions.stateful.StatefulAggregator;
 import it.uniroma3.radeon.sa.functions.stateful.SumAggregator;
 
 import org.apache.spark.api.java.JavaPairRDD;
@@ -52,27 +53,28 @@ public class ClusterClassifyKafka {
 		Properties prop = PropertyLoader.loadProperties(configFile);
 		
 		//Carica le regole di traduzione
-		Map<String, String> translationRules = Parsing.ruleParser(prop.get("translationRules").toString(), "=");
-		
 		SparkConf conf = new SparkConf().setAppName("Sentiment Analysis classifier")
-				                        .set("RawTweets", prop.get("rawTweets").toString())
+										.set("NormRules", prop.get("normRules").toString())
 										.set("ModelInputDir", prop.get("modelInputDir").toString())
-		                                .set("ResultOutputDir", prop.get("resultOutputDir").toString())
 		                                .set("ZKQuorum", prop.get("zkQuorum").toString())
 		                                .set("ConsumerGroupID", prop.get("consumerGroupID").toString())
 		                                .set("Topics", prop.get("topicList").toString());
+		
+		Map<String, String> normRules = Parsing.ruleParser(conf.get("NormRules"), "=");
 		
 		
 		JavaStreamingContext stsc = new JavaStreamingContext(conf, Durations.seconds(2));
 		stsc.checkpoint("s3://sportlightstorage/checkpointing");
 		
+		Map<String, Integer> topics = Parsing.parseTopics(conf.get("Topics"), ",", "/");
+		
 		//Definizione dello stato iniziale
 		List<Tuple2<String, Long>> tuples =
-        	Arrays.asList(new Tuple2<>("0.0", 0L), new Tuple2<>("1.1", 0L));
+        	Arrays.asList(new Tuple2<>("neg", 0L), new Tuple2<>("pos", 0L));
 		JavaPairRDD<String, Long> initialRDD = stsc.sparkContext().parallelizePairs(tuples);
 		
-		Map<String, Integer> topics = new HashMap<>();
-		topics.put("tweets", 1);
+//		Map<String, Integer> topics = new HashMap<>();
+//		topics.put("tweets", 1);
 		
 		//Crea un convertitore che traduca ogni tweet in una rappresentazione vettoriale
 		HashingTF htf = new HashingTF(1000);
@@ -85,7 +87,7 @@ public class ClusterClassifyKafka {
 //		listenedTweets.print();
 		
 		//Normalizza i tweet da classificare
-		JavaDStream<UnlabeledTweet> normClassSet = listenedTweets.map(new UnlabeledTweetMapper(",", translationRules));
+		JavaDStream<UnlabeledTweet> normClassSet = listenedTweets.map(new UnlabeledTweetMapper(",", normRules));
 		
 		//Calcola una rappresentazione vettoriale dei tweet da classificare
 		JavaDStream<UnlabeledTweet> vsmClassSet = normClassSet.map(new VectorizerModifier(htf));
@@ -98,27 +100,15 @@ public class ClusterClassifyKafka {
 		
 		//Conta i tweet classificati per sentimento
 		JavaPairDStream<String, Long> sentiment2count = classifiedSet.map(new FieldExtractFunction<ClassificationResult, String>("sentiment"))
-				                                                        .mapToPair(new PairToFunction<String, Long>(1L))
-				                                                        .reduceByKey(new SumReduceFunction());
+				                                                     .mapToPair(new PairToFunction<String, Long>(1L))
+				                                                     .reduceByKey(new SumReduceFunction());
 		
-		//Funzione di aggiornamento (nel refactor deve essere assolutamente tolta da qui)
-	    Function3<String, Optional<Long>, State<Long>, Tuple2<String, Long>> updateFunc =
-	            new Function3<String, Optional<Long>, State<Long>, Tuple2<String, Long>>() {
-	    	
-					private static final long serialVersionUID = 1L;
-
-				@Override
-	              public Tuple2<String, Long> call(String sentiment, Optional<Long> newCount,
-	                  State<Long> prevCount) {
-					long sum = newCount.or(0L) + (prevCount.exists() ? prevCount.get() : 0L);
-	                Tuple2<String, Long> output = new Tuple2<>(sentiment, sum);
-	                prevCount.update(sum);
-	                return output;
-	              }
-	            };
+		//Funzione di aggiornamento
+		StatefulAggregator<String, Long> updateFunction = new SumAggregator<String>();
+		
 		//Aggiorna lo stato precedente
 		JavaMapWithStateDStream<String, Long, Long, Tuple2<String, Long>> totals = 
-				sentiment2count.mapWithState(StateSpec.function(updateFunc).initialState(initialRDD));
+				sentiment2count.mapWithState(StateSpec.function(updateFunction).initialState(initialRDD));
 		
 		totals.print();
 		

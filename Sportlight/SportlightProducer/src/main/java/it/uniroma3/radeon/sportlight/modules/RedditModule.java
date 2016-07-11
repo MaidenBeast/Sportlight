@@ -2,7 +2,9 @@ package it.uniroma3.radeon.sportlight.modules;
 
 import static java.util.Arrays.asList;
 
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -12,8 +14,10 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 
+import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 
 import com.fasterxml.jackson.core.JsonParseException;
@@ -33,10 +37,20 @@ public class RedditModule extends Module {
 	private static final String MODIFIED_USER_AGENT = "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:46.0) Gecko/20100101 Firefox/46.0";
 	
 	private State redditState;
+	private KafkaProducer<String, String> redditProducer;
 
 	public RedditModule() {
 		super();
 		this.redditState = this.state_repo.getStateBySrc("reddit");
+		Properties properties = null;
+
+		try (InputStream props = new FileInputStream("producer.props")) {
+			properties = new Properties();
+			properties.load(props);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		this.redditProducer = new KafkaProducer<>(properties);
 	}
 	
 	@Override
@@ -140,7 +154,7 @@ public class RedditModule extends Module {
 					}
 					//System.out.println(mapper.writeValueAsString(newComment));
 					//invio il commento al topic "sportlight" di Kafka
-					producer.send(new ProducerRecord<String, String>("sportlight", mapper.writeValueAsString(newComment)));
+					redditProducer.send(new ProducerRecord<String, String>("sportlight", mapper.writeValueAsString(newComment)));
 				}
 				
 				//DEBUG
@@ -216,7 +230,7 @@ public class RedditModule extends Module {
 					String jsonPost = mapper.writeValueAsString(post);
 					
 					//System.out.println(jsonPost); //DEBUG
-					producer.send(new ProducerRecord<String, String>("sportlight",jsonPost));
+					redditProducer.send(new ProducerRecord<String, String>("sportlight",jsonPost));
 
 				}
 
@@ -323,7 +337,7 @@ public class RedditModule extends Module {
 				}
 
 				//invio il post al topic "sportlight" di Kafka
-				producer.send(new ProducerRecord<String, String>("sportlight", mapper.writeValueAsString(post)));
+				redditProducer.send(new ProducerRecord<String, String>("sportlight", mapper.writeValueAsString(post)));
 
 			} catch (MalformedURLException e) {
 				e.printStackTrace();

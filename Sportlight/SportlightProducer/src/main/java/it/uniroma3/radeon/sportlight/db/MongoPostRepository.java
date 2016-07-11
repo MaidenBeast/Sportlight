@@ -2,6 +2,7 @@ package it.uniroma3.radeon.sportlight.db;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -193,6 +194,43 @@ public class MongoPostRepository implements PostRepository {
 			cursor.close();
 		}
 
+		return postMap;
+	}
+
+	@Override
+	public Map<String, Post> findAllPostsWithoutCommentsBySrcs(List<String> srcs) {
+		final Map<String, Post> postMap = new HashMap<String, Post>();
+
+		final ObjectMapper mapper = new ObjectMapper();
+		MongoCollection<Document> collection = this.mongoDataSource.getCollection("post");
+
+		List<String> excludeFields = new LinkedList<>();
+		excludeFields.add("_id"); //intanto escludo il campo _id
+		
+		Bson query = size("comments", 0);
+		Bson projection = exclude(excludeFields); //proiezione per esclusione
+		MongoCursor<Document> cursor;
+		
+		cursor = collection.find(query)
+				.projection(projection)
+				.iterator();
+		
+		try {
+			while (cursor.hasNext()) {
+				Document document = cursor.next();
+				Post post = mapper.readValue(document.toJson(), Post.class);
+				postMap.put(post.getId(), post);
+			}
+		} catch (JsonParseException e) {
+			e.printStackTrace();
+		} catch (JsonMappingException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		} finally {
+			cursor.close();
+		}
+		
 		return postMap;
 	}
 

@@ -54,6 +54,14 @@ public class MongoPostRepositoryTest {
 		post3.setBody("post3");
 
 		posts.add(post3);
+		
+		Post post4 = new Post();
+		post4.setId("post4");
+		post4.setSrc("fb");
+		post4.setTitle("post4");
+		post4.setBody("post4");
+
+		posts.add(post4);
 
 		MongoPostRepositoryTest.post_repo.persistMany(posts);
 
@@ -226,7 +234,11 @@ public class MongoPostRepositoryTest {
 		Assert.assertEquals("post3", posts.get("post3").getTitle());
 		Assert.assertEquals("post3", posts.get("post3").getBody());
 		
-		Assert.assertTrue(posts.size() == 3);
+		Assert.assertEquals("post4", posts.get("post4").getId());
+		Assert.assertEquals("post4", posts.get("post4").getTitle());
+		Assert.assertEquals("post4", posts.get("post4").getBody());
+		
+		Assert.assertTrue(posts.size() == 4);
 	}
 	
 	@Test
@@ -242,6 +254,23 @@ public class MongoPostRepositoryTest {
 		Assert.assertEquals("post2", posts.get("post2").getTitle());
 		Assert.assertEquals("post2", posts.get("post2").getBody());
 		Assert.assertEquals("reddit", posts.get("post2").getSrc());
+		
+		Assert.assertTrue(posts.size() == 2);
+	}
+	
+	@Test
+	public void testFindAllPostsWithoutCommentsBySrcs() {
+		Map<String, Post> posts = this.post_repo.findAllPostsWithoutCommentsBySrcs(asList("fb"));
+		
+		Assert.assertEquals("post3", posts.get("post3").getId());
+		Assert.assertEquals("post3", posts.get("post3").getTitle());
+		Assert.assertEquals("post3", posts.get("post3").getBody());
+		Assert.assertEquals("fb", posts.get("post3").getSrc());
+		
+		Assert.assertEquals("post4", posts.get("post4").getId());
+		Assert.assertEquals("post4", posts.get("post4").getTitle());
+		Assert.assertEquals("post4", posts.get("post4").getBody());
+		Assert.assertEquals("fb", posts.get("post4").getSrc());
 		
 		Assert.assertTrue(posts.size() == 2);
 	}

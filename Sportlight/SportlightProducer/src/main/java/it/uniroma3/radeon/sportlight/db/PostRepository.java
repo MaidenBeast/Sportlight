@@ -13,4 +13,5 @@ public interface PostRepository {
 	public Map<String, Post> findPostsByIds(Set<String> ids, boolean alsoComments);
 	public Map<String, Post> findAllPosts(boolean alsoComments);
 	public Map<String, Post> findAllPostsBySrcs(List<String> srcs, boolean alsoComments);
+	public Map<String, Post> findAllPostsWithoutCommentsBySrcs(List<String> srcs);
 }

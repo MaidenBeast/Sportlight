@@ -8,10 +8,8 @@ public class ModuleThread extends Thread {
 			this.module = (Module) Class.forName(className).newInstance();
 			this.start();
 		} catch (InstantiationException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IllegalAccessException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (ClassNotFoundException e) {
 			throw new ModuleNotFoundException("Modulo "+className+" non trovato");

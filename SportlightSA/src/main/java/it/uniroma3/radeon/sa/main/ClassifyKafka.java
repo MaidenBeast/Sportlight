@@ -9,7 +9,7 @@ import it.uniroma3.radeon.sa.functions.SumReduceFunction;
 import it.uniroma3.radeon.sa.functions.mappers.ClassificationMapper;
 import it.uniroma3.radeon.sa.functions.mappers.UnlabeledTweetMapper;
 import it.uniroma3.radeon.sa.functions.modifiers.VectorizerModifier;
-import it.uniroma3.radeon.sa.functions.stateful.SumToMapAggregator;
+import it.uniroma3.radeon.sa.functions.stateful.SumAggregator;
 import it.uniroma3.radeon.sa.utils.Parsing;
 
 import java.io.FileReader;

@@ -17,9 +17,13 @@ public class UnlabeledTweetMapper extends TextMapper<UnlabeledTweet> {
 	}
 	
 	public UnlabeledTweet call(String text) {
-		String[] tweetFields = this.splitText(text);
+		//Test code
+//		String[] tweetFields = this.splitText(text);
+//		UnlabeledTweet tweet = new UnlabeledTweet();
+//		tweet.setText(new TextCleaner(this.translationRules).cleanUp(tweetFields[2]));
+		
 		UnlabeledTweet tweet = new UnlabeledTweet();
-		tweet.setText(new TextCleaner(this.translationRules).cleanUp(tweetFields[2]));
+		tweet.setText(new TextCleaner(this.translationRules).cleanUp(text));
 		return tweet;
 	}
 }

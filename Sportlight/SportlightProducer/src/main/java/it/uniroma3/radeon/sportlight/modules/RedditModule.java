@@ -76,10 +76,10 @@ public class RedditModule extends Module {
 				}
 				
 				Set<String> newCommentsIds = newCommentsMap.keySet();
-				//intanto verifico quali sono i commenti presenti già su MongoDB
+				//intanto verifico quali sono i commenti presenti gia' su MongoDB
 				Map<String, Comment> mongoComments = this.comment_repo.findCommentsByIds(newCommentsIds);
 				
-				//differenza insiemistica tra gli id dei nuovi commenti scaricati ora da reddit e quelli già presenti su Mongo
+				//differenza insiemistica tra gli id dei nuovi commenti scaricati ora da reddit e quelli gia' presenti su Mongo
 				newCommentsIds.removeAll(mongoComments.keySet());
 				
 				List<Comment> commentsToPush = new ArrayList<Comment>(newCommentsIds.size());
@@ -92,7 +92,7 @@ public class RedditModule extends Module {
 					String bodyComment = commentNode.get("body").asText();
 					newComment.setBody(bodyComment);
 					
-					//per controlla se pure il post è già presente su Mongo...
+					//per controlla se pure il post e' gia' presente su Mongo...
 					String postId = commentNode.get("link_id").asText();
 					Post post = post_repo.findPostById("reddit_"+postId, false);
 
@@ -145,7 +145,7 @@ public class RedditModule extends Module {
 				
 				//DEBUG
 				System.out.println("ID dei nuovi commenti: "+newCommentsIds);
-				System.out.println("ID dei commenti già presenti su Mongo: "+mongoComments.keySet());
+				System.out.println("ID dei commenti gia' presenti su Mongo: "+mongoComments.keySet());
 				
 				if (commentsToPush.size() > 0) //se ci stanno dei commenti da persistere
 					this.comment_repo.persistMany(commentsToPush); //salvo su Mongo tutti i commenti ancora non persistiti
@@ -200,7 +200,7 @@ public class RedditModule extends Module {
 
 					long createTime = jsonChildData.get("created").asLong()*1000;
 
-					//se il post è stato pubblicato un'anno fa, allora blocca il ciclo esterno
+					//se il post e' stato pubblicato un'anno fa, allora blocca il ciclo esterno
 					if (createTime < prevYearTimeStamp)
 						toIterate = false;
 
@@ -223,7 +223,7 @@ public class RedditModule extends Module {
 				Set<String> fetchedPostIds = postMapTemp.keySet();
 				Map<String, Post> mongoPosts = this.post_repo.findPostsByIds(fetchedPostIds, false);
 
-				//differenza insiemistica tra gli id dei post scaricati ora da reddit e quelli già presenti su Mongo
+				//differenza insiemistica tra gli id dei post scaricati ora da reddit e quelli gia' presenti su Mongo
 				fetchedPostIds.removeAll(mongoPosts.keySet());
 
 				List<Post> postsToPush = new ArrayList<Post>(fetchedPostIds.size());
@@ -233,7 +233,7 @@ public class RedditModule extends Module {
 
 				//DEBUG
 				System.out.println("ID dei nuovi post: "+fetchedPostIds);
-				System.out.println("ID dei post già presenti su Mongo: "+mongoPosts.keySet());
+				System.out.println("ID dei post gia' presenti su Mongo: "+mongoPosts.keySet());
 
 				if (postsToPush.size() > 0) //se ci stanno dei nuovi post
 					this.post_repo.persistMany(postsToPush); //salvo su Mongo tutti i post ancora non persistiti
@@ -303,7 +303,7 @@ public class RedditModule extends Module {
 					Set<String> fetchedCommentsIds = commentsMap.keySet();
 					Map<String, Comment> mongoComments = this.comment_repo.findCommentsByIds(fetchedCommentsIds);
 
-					//differenza insiemistica tra gli id dei post scaricati ora da reddit e quelli già presenti su Mongo
+					//differenza insiemistica tra gli id dei post scaricati ora da reddit e quelli gia' presenti su Mongo
 					fetchedCommentsIds.removeAll(mongoComments.keySet());
 
 					List<Comment> commentsToPush = new ArrayList<Comment>(fetchedCommentsIds.size());
@@ -313,7 +313,7 @@ public class RedditModule extends Module {
 
 					//DEBUG
 					System.out.println("ID dei nuovi commenti: "+fetchedCommentsIds);
-					System.out.println("ID dei commenti già presenti su Mongo: "+mongoComments.keySet());
+					System.out.println("ID dei commenti gia' presenti su Mongo: "+mongoComments.keySet());
 
 					if (commentsToPush.size()>0) //se ci stanno dei nuovi commenti
 						this.comment_repo.persistMany(commentsToPush); //salvo su Mongo tutti i post ancora non persistiti

@@ -132,7 +132,7 @@ public class TwitterModule extends Module {
 				Set<String> fetchedPostIds = postMapTemp.keySet();
 				Map<String, Post> mongoPosts = this.post_repo.findPostsByIds(fetchedPostIds, false);
 
-				//differenza insiemistica tra gli id dei post scaricati ora da twitter e quelli già presenti su Mongo
+				//differenza insiemistica tra gli id dei post scaricati ora da twitter e quelli gia' presenti su Mongo
 				fetchedPostIds.removeAll(mongoPosts.keySet());
 
 				List<Post> postsToPush = new ArrayList<Post>(fetchedPostIds.size());
@@ -142,7 +142,7 @@ public class TwitterModule extends Module {
 
 				//DEBUG
 				System.out.println("ID dei nuovi post: "+fetchedPostIds);
-				System.out.println("ID dei post già presenti su Mongo: "+mongoPosts.keySet());
+				System.out.println("ID dei post gia' presenti su Mongo: "+mongoPosts.keySet());
 
 				if (postsToPush.size() > 0) //se ci stanno dei nuovi post
 					this.post_repo.persistMany(postsToPush); //salvo su Mongo tutti i post ancora non persistiti
@@ -257,7 +257,7 @@ public class TwitterModule extends Module {
 						e.printStackTrace();
 					}
 					
-					if (postBuffer.size() >= 50) { //il buffer è uguale o superiore a 50
+					if (postBuffer.size() >= 50) { //il buffer e' uguale o superiore a 50
 						post_repo.persistMany(postBuffer);
 						postBuffer.clear();
 					}

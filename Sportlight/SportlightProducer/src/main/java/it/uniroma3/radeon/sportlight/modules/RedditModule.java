@@ -143,6 +143,7 @@ public class RedditModule extends Module {
 						post.setTitle(title);
 						post.setBody(selftext);
 						post.addComment(newComment);
+						post.addTopic("Euro2016");
 						
 						//System.out.println(mapper.writeValueAsString(post));
 						
@@ -224,6 +225,8 @@ public class RedditModule extends Module {
 					post.setBody(jsonChildData.get("selftext").asText());
 					post.setTitle(jsonChildData.get("title").asText());
 					post.setSrc("reddit");
+					
+					post.addTopic("Euro2016");
 
 					postMapTemp.put(post.getId(), post);
 

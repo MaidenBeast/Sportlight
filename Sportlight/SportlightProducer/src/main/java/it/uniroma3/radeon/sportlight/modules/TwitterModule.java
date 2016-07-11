@@ -28,6 +28,7 @@ import it.uniroma3.radeon.sportlight.data.Comment;
 import it.uniroma3.radeon.sportlight.data.Post;
 import it.uniroma3.radeon.sportlight.data.State;
 import twitter4j.FilterQuery;
+import twitter4j.HashtagEntity;
 import twitter4j.Query;
 import twitter4j.QueryResult;
 import twitter4j.RateLimitStatus;
@@ -143,7 +144,12 @@ public class TwitterModule extends Module {
 								twitterPost.setId("twitter_"+String.valueOf(status_id));
 								twitterPost.setBody(status.getText());
 								twitterPost.setSrc("twitter");
-
+								
+								HashtagEntity[] hashtags = status.getHashtagEntities();
+								
+								for (HashtagEntity hashtag : hashtags)
+									twitterPost.addTopic(hashtag.getText());
+								
 								postMapTemp.put(twitterPost.getId(), twitterPost);
 
 								if (status.getRetweetCount() > 0) {
@@ -328,7 +334,12 @@ public class TwitterModule extends Module {
 							twitterPost.setId("twitter_"+String.valueOf(status_id));
 							twitterPost.setBody(status.getText());
 							twitterPost.setSrc("twitter");
-
+							
+							HashtagEntity[] hashtags = status.getHashtagEntities();
+							
+							for (HashtagEntity hashtag : hashtags)
+								twitterPost.addTopic(hashtag.getText());
+							
 							String jsonPost = null;
 							try {
 								jsonPost = mapper.writeValueAsString(twitterPost);

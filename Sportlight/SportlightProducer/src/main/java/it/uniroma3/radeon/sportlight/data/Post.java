@@ -13,12 +13,14 @@ public class Post {
 	private String title;
 	private String body;
 	private List<Comment> comments;
+	private List<String> topics;
 	private String type;
 
 	public Post() {
 		this.title = "";
 		this.body = "";
 		this.comments = new LinkedList<Comment>();
+		this.topics = new LinkedList<String>();
 		this.type = "post";
 	}
 
@@ -78,6 +80,18 @@ public class Post {
 	public String toString() {
 		return "Post [id=" + id + ", src=" + src + ", title=" + title + ", body=" + body + ", comments=" + comments
 				+ ", type=" + type + "]";
+	}
+
+	public List<String> getTopics() {
+		return topics;
+	}
+
+	public void setTopics(List<String> topics) {
+		this.topics = topics;
+	}
+	
+	public void addTopic(String topic) {
+		this.topics.add(topic);
 	}
 	
 }

@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>it.uniroma3.radeon</groupId>
   <artifactId>SportlightProducer</artifactId>
-  <version>0.1</version>
+  <version>0.5</version>
   <name>SportlightProducer</name>
   <build>
   	<plugins>

@@ -9,7 +9,7 @@ import it.uniroma3.radeon.sa.functions.SumReduceFunction;
 import it.uniroma3.radeon.sa.functions.mappers.ClassificationMapper;
 import it.uniroma3.radeon.sa.functions.mappers.UnlabeledTweetMapper;
 import it.uniroma3.radeon.sa.functions.modifiers.VectorizerModifier;
-import it.uniroma3.radeon.sa.functions.stateful.SumToMapAggregator;
+import it.uniroma3.radeon.sa.functions.stateful.SumAggregator;
 import it.uniroma3.radeon.sa.utils.Parsing;
 
 import java.io.FileReader;
@@ -80,8 +80,8 @@ public class ClassifyKafka {
 		
 		//Conta i tweet classificati per sentimento
 		JavaPairDStream<String, Integer> sentiment2count = classifiedSet.map(new FieldExtractFunction<ClassificationResult, String>("sentiment"))
-				                                                        .mapToPair(new PairToFunction<String, Integer>(1))
-				                                                        .reduceByKey(new SumReduceFunction());
+				                                                        .mapToPair(new PairToFunction<String, Integer>(1));
+//				                                                        .reduceByKey(new SumReduceFunction());
 		
 //		Map<String, Integer> totals = new HashMap<>();
 //		sentiment2count.foreachRDD(new SumToMapAggregator(totals));

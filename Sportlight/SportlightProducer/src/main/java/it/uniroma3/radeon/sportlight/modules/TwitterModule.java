@@ -60,6 +60,7 @@ public class TwitterModule extends Module {
 	final private List<Post> toGetRetweetsPosts;
 
 	private State twitterState;
+	private int remainingRateLimit;
 
 	public TwitterModule() {
 		super();
@@ -67,6 +68,7 @@ public class TwitterModule extends Module {
 		this.query = new Query("#Euro2016");
 		this.toGetRetweetsPosts = new LinkedList<Post>();
 		this.twitterState = this.state_repo.getStateBySrc("twitter");
+		this.remainingRateLimit = 180;
 	}
 
 	@Override
@@ -104,14 +106,7 @@ public class TwitterModule extends Module {
 					ObjectMapper mapper = new ObjectMapper();
 
 					do {
-						Map<String, RateLimitStatus> rateLimitStatusMap = twitter.getRateLimitStatus();
-						RateLimitStatus rateLimitStatus = rateLimitStatusMap.get("/application/rate_limit_status");
-						int remainingRateLimit = rateLimitStatus.getRemaining();
-
-						if (remainingRateLimit == 1) {
-							int secondsToWaitRateLimit = rateLimitStatus.getSecondsUntilReset();
-							Thread.sleep(secondsToWaitRateLimit*1000);
-						} 
+						Map<String, RateLimitStatus> rateLimitStatusMap = getRateLimitStatus();
 						RateLimitStatus searchLimitStatus = rateLimitStatusMap.get("/search/tweets");
 
 						int remaining = searchLimitStatus.getRemaining();
@@ -228,23 +223,16 @@ public class TwitterModule extends Module {
 					e.printStackTrace();
 				}
 
+				@SuppressWarnings("resource")
 				final KafkaProducer<String, String> retweetProducer = new KafkaProducer<>(properties);
 				ObjectMapper mapper = new ObjectMapper();
 
 				while (true) { //loop infinito
-					Map<String, Post> toGetRetweetsPosts = post_repo.findAllPostsWithoutCommentsBySrcs(asList("twitter"));
-
+					Map<String, Post> toGetRetweetsPosts = post_repo.findAllPostsBySrcs(asList("twitter"), false);
 					for (Post toGetRetweetsPost : toGetRetweetsPosts.values()) {
 						List<Status> retweets;
 						try {
-							Map<String, RateLimitStatus> rateLimitStatusMap = twitter.getRateLimitStatus();
-							RateLimitStatus rateLimitStatus = rateLimitStatusMap.get("/application/rate_limit_status");
-							int remainingRateLimit = rateLimitStatus.getRemaining();
-
-							if (remainingRateLimit == 1) {
-								int secondsToWaitRateLimit = rateLimitStatus.getSecondsUntilReset();
-								Thread.sleep(secondsToWaitRateLimit*1000);
-							}
+							Map<String, RateLimitStatus> rateLimitStatusMap = getRateLimitStatus();
 							RateLimitStatus searchLimitStatus = rateLimitStatusMap.get("/statuses/retweets/:id");
 
 							int remaining = searchLimitStatus.getRemaining();
@@ -258,7 +246,8 @@ public class TwitterModule extends Module {
 
 							Thread.sleep(secondsToWait*1000);
 
-							Long toGetRetweetsId = Long.valueOf(toGetRetweetsPost.getId().lastIndexOf("_")+1);
+							String postId = toGetRetweetsPost.getId();
+							Long toGetRetweetsId = Long.valueOf(postId.substring(postId.lastIndexOf("_")+1));
 
 							retweets = twitter.getRetweets(toGetRetweetsId);
 							for (Status retweet : retweets) { //retweets (da trattare come Comment)
@@ -396,6 +385,33 @@ public class TwitterModule extends Module {
 				.setOAuthAccessToken(ACCESS_TOKEN)
 				.setOAuthAccessTokenSecret(ACCESS_TOKEN_SECRET)
 				.build();
+	}
+	
+	private synchronized Map<String, RateLimitStatus> getRateLimitStatus() {
+		Map<String, RateLimitStatus> rateLimitStatusMap = null;
+		try {
+			rateLimitStatusMap = twitter.getRateLimitStatus();
+			RateLimitStatus rateLimitStatus = rateLimitStatusMap.get("/application/rate_limit_status");
+			this.remainingRateLimit = rateLimitStatus.getRemaining();
+			
+			if (this.remainingRateLimit == 1) {
+				int secondsToWaitRateLimit = rateLimitStatus.getSecondsUntilReset();
+				Thread.sleep(secondsToWaitRateLimit*1000);
+				return this.getRateLimitStatus();
+			}
+		} catch (TwitterException e) {
+			try {
+				Thread.sleep(900*1000);
+				return this.getRateLimitStatus(); //e riprova
+			} catch (InterruptedException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			} //aspetta per un quarto d'ora
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		
+		return rateLimitStatusMap;
 	}
 
 }

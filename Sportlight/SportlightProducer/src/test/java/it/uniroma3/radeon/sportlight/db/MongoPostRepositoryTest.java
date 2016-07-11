@@ -258,7 +258,7 @@ public class MongoPostRepositoryTest {
 		Assert.assertTrue(posts.size() == 2);
 	}
 	
-	@Test
+	/*@Test
 	public void testFindAllPostsWithoutCommentsBySrcs() {
 		Map<String, Post> posts = this.post_repo.findAllPostsWithoutCommentsBySrcs(asList("fb"));
 		
@@ -273,6 +273,6 @@ public class MongoPostRepositoryTest {
 		Assert.assertEquals("fb", posts.get("post4").getSrc());
 		
 		Assert.assertTrue(posts.size() == 2);
-	}
+	}*/
 
 }

@@ -67,9 +67,9 @@ public class ClusterClassifyKafka {
 		stsc.checkpoint("s3://sportlightstorage/checkpointing");
 		
 		//Definizione dello stato iniziale
-		List<Tuple2<String, Integer>> tuples =
-        	Arrays.asList(new Tuple2<>("0.0", 0), new Tuple2<>("1.1", 0));
-		JavaPairRDD<String, Integer> initialRDD = stsc.sparkContext().parallelizePairs(tuples);
+		List<Tuple2<String, Long>> tuples =
+        	Arrays.asList(new Tuple2<>("0.0", 0L), new Tuple2<>("1.1", 0L));
+		JavaPairRDD<String, Long> initialRDD = stsc.sparkContext().parallelizePairs(tuples);
 		
 		Map<String, Integer> topics = new HashMap<>();
 		topics.put("tweets", 1);
@@ -97,27 +97,27 @@ public class ClusterClassifyKafka {
 		JavaDStream<ClassificationResult> classifiedSet = vsmClassSet.map(new ClassificationMapper(model));
 		
 		//Conta i tweet classificati per sentimento
-		JavaPairDStream<String, Integer> sentiment2count = classifiedSet.map(new FieldExtractFunction<ClassificationResult, String>("sentiment"))
-				                                                        .mapToPair(new PairToFunction<String, Integer>(1))
+		JavaPairDStream<String, Long> sentiment2count = classifiedSet.map(new FieldExtractFunction<ClassificationResult, String>("sentiment"))
+				                                                        .mapToPair(new PairToFunction<String, Long>(1L))
 				                                                        .reduceByKey(new SumReduceFunction());
 		
 		//Funzione di aggiornamento (nel refactor deve essere assolutamente tolta da qui)
-	    Function3<String, Optional<Integer>, State<Integer>, Tuple2<String, Integer>> updateFunc =
-	            new Function3<String, Optional<Integer>, State<Integer>, Tuple2<String, Integer>>() {
+	    Function3<String, Optional<Long>, State<Long>, Tuple2<String, Long>> updateFunc =
+	            new Function3<String, Optional<Long>, State<Long>, Tuple2<String, Long>>() {
 	    	
 					private static final long serialVersionUID = 1L;
 
 				@Override
-	              public Tuple2<String, Integer> call(String sentiment, Optional<Integer> newCount,
-	                  State<Integer> prevCount) {
-					int sum = newCount.or(0) + (prevCount.exists() ? prevCount.get() : 0);
-	                Tuple2<String, Integer> output = new Tuple2<>(sentiment, sum);
+	              public Tuple2<String, Long> call(String sentiment, Optional<Long> newCount,
+	                  State<Long> prevCount) {
+					long sum = newCount.or(0L) + (prevCount.exists() ? prevCount.get() : 0L);
+	                Tuple2<String, Long> output = new Tuple2<>(sentiment, sum);
 	                prevCount.update(sum);
 	                return output;
 	              }
 	            };
 		//Aggiorna lo stato precedente
-		JavaMapWithStateDStream<String, Integer, Integer, Tuple2<String, Integer>> totals = 
+		JavaMapWithStateDStream<String, Long, Long, Tuple2<String, Long>> totals = 
 				sentiment2count.mapWithState(StateSpec.function(updateFunc).initialState(initialRDD));
 		
 		totals.print();

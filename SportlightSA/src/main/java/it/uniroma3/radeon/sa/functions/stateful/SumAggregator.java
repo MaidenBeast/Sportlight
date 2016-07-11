@@ -13,15 +13,15 @@ import com.google.common.base.Optional;
 
 import scala.Tuple2;
 
-public class SumAggregator<K> extends StatefulAggregator<K, Integer> {
+public class SumAggregator<K> extends StatefulAggregator<K, Long> {
 	
 	private static final long serialVersionUID = 1L;
 
 	@Override
-	public Tuple2<K, Integer> call(K key, Optional<Integer> newValue, State<Integer> prevValue)
+	public Tuple2<K, Long> call(K key, Optional<Long> newValue, State<Long> prevValue)
 			throws Exception {
-		int sum = newValue.or(0) + this.getStateIfExists(prevValue, 0);
-		Tuple2<K, Integer> output = new Tuple2<>(key, sum);
+		long sum = newValue.or(0L) + this.getStateIfExists(prevValue, 0L);
+		Tuple2<K, Long> output = new Tuple2<>(key, sum);
 		prevValue.update(sum);
 		return output;
 	}

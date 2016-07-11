@@ -80,8 +80,8 @@ public class ClassifyKafka {
 		
 		//Conta i tweet classificati per sentimento
 		JavaPairDStream<String, Integer> sentiment2count = classifiedSet.map(new FieldExtractFunction<ClassificationResult, String>("sentiment"))
-				                                                        .mapToPair(new PairToFunction<String, Integer>(1))
-				                                                        .reduceByKey(new SumReduceFunction());
+				                                                        .mapToPair(new PairToFunction<String, Integer>(1));
+//				                                                        .reduceByKey(new SumReduceFunction());
 		
 //		Map<String, Integer> totals = new HashMap<>();
 //		sentiment2count.foreachRDD(new SumToMapAggregator(totals));

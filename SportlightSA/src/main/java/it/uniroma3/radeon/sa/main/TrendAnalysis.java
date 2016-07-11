@@ -54,15 +54,15 @@ public class TrendAnalysis {
 				          .map(new PostMapper());
 		
 		//Per ogni post preleva e conta gli argomenti
-		JavaPairDStream<String, Integer> topic2count = listenedPosts.map(new FieldExtractFunction<Post, List<String>>("topics"))
+		JavaPairDStream<String, Long> topic2count = listenedPosts.map(new FieldExtractFunction<Post, List<String>>("topics"))
 				                                                    .flatMap(new FlattenFunction<String>())
-				                                                    .mapToPair(new PairToFunction<String, Integer>(1))
+				                                                    .mapToPair(new PairToFunction<String, Long>(1L))
 				                                                    .reduceByKey(new SumReduceFunction());
 		
 		//Definisci la funzione di aggiornamento
-		StatefulAggregator<String, Integer> updateFunction = new SumAggregator<String>();
+		StatefulAggregator<String, Long> updateFunction = new SumAggregator<String>();
 		//Aggiorna lo stato precedente e ordina per conteggio
-		JavaMapWithStateDStream<String, Integer, Integer, Tuple2<String, Integer>> totals = 
+		JavaMapWithStateDStream<String, Long, Long, Tuple2<String, Long>> totals = 
 				topic2count.mapWithState(StateSpec.function(updateFunction));
 //				           .map(new ReversePairFunction())
 //				           .sortByKey()

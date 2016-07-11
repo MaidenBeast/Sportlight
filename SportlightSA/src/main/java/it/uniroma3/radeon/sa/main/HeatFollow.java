@@ -4,12 +4,16 @@ import it.uniroma3.radeon.sa.data.ClassificationResult;
 import it.uniroma3.radeon.sa.data.Comment;
 import it.uniroma3.radeon.sa.data.Post;
 import it.uniroma3.radeon.sa.data.UnlabeledTweet;
+import it.uniroma3.radeon.sa.data.stateful.StateEntry;
 import it.uniroma3.radeon.sa.functions.FieldExtractFunction;
 import it.uniroma3.radeon.sa.functions.FlattenFunction;
 import it.uniroma3.radeon.sa.functions.GetPairValueFunction;
+import it.uniroma3.radeon.sa.functions.MakePairFunction;
 import it.uniroma3.radeon.sa.functions.PairToFunction;
+import it.uniroma3.radeon.sa.functions.ReversePairFunction;
 import it.uniroma3.radeon.sa.functions.SumReduceFunction;
 import it.uniroma3.radeon.sa.functions.mappers.ClassificationMapper;
+import it.uniroma3.radeon.sa.functions.mappers.FrequencyStateMapper;
 import it.uniroma3.radeon.sa.functions.mappers.PostMapper;
 import it.uniroma3.radeon.sa.functions.mappers.UnlabeledTweetMapper;
 import it.uniroma3.radeon.sa.functions.modifiers.VectorizerModifier;
@@ -39,9 +43,9 @@ import org.apache.spark.streaming.kafka.KafkaUtils;
 
 import scala.Tuple2;
 
-public class SentimentFollow {
+public class HeatFollow {
 	
-	//Provvisorio: calcola l'evoluzione del sentimento su TUTTI gli argomenti ascoltati
+	//Provvisorio: calcola la frequenza di posting su TUTTI gli argomenti ascoltati
 	
 	public static void main(String[] args) {
 		String configFile = args[0];
@@ -50,22 +54,18 @@ public class SentimentFollow {
 		
 		Properties prop = PropertyLoader.loadProperties(configFile);
 		
-		SparkConf conf = new SparkConf().setAppName("Sentiment following")
-										.set("NormRulesFile", prop.get("normRulesFile").toString())
-										.set("ModelInputDir", prop.get("modelInputDir").toString())
+		SparkConf conf = new SparkConf().setAppName("Heat following")
 		                                .set("ZKQuorum", prop.get("zkQuorum").toString())
 		                                .set("ConsumerGroupID", prop.get("consumerGroupID").toString())
 		                                .set("Topics", prop.get("topicList").toString());
 		
-		Map<String, String> normRules = Parsing.ruleParser(conf.get("normRulesFile"), "=");
-		
 		JavaStreamingContext stsc = new JavaStreamingContext(conf, Durations.seconds(2));
 		stsc.checkpoint("s3://sportlightstorage/checkpointing");
 		
-		//Definizione dello stato iniziale
+		//Definisci lo stato iniziale
 		List<Tuple2<String, Long>> tuples =
-        	Arrays.asList(new Tuple2<>("0.0", 0L), new Tuple2<>("1.0", 0L));
-		JavaPairRDD<String, Long> initialRDD = stsc.sparkContext().parallelizePairs(tuples);
+	        	Arrays.asList(new Tuple2<>("postings", 0L), new Tuple2<>("time", 0L));
+			JavaPairRDD<String, Long> initialRDD = stsc.sparkContext().parallelizePairs(tuples);
 		
 		Map<String, Integer> topics = new HashMap<>();
 		topics.put("tweets", 1);
@@ -76,9 +76,6 @@ public class SentimentFollow {
 				          .map(new GetPairValueFunction<String, String>())
 				          .map(new PostMapper());
 		
-		//Crea un convertitore che traduca ogni testo in una rappresentazione vettoriale
-		HashingTF htf = new HashingTF(1000);
-		
 		//Ottieni dai post una collezione del testo del post e di quello dei commenti associati
 		JavaDStream<String> allPostTexts = listenedPosts.map(new FieldExtractFunction<Post, String>("body"));
 		
@@ -86,37 +83,20 @@ public class SentimentFollow {
 				                                           .flatMap(new FlattenFunction<Comment>())
 				                                           .map(new FieldExtractFunction<Comment, String>("body"));
 		
-		//Unisci le collezioni dei testi dei post e dei commenti ed effettua la normalizzazione
-		JavaDStream<UnlabeledTweet> normClassSet = allPostTexts.union(allCommentTexts)
-				                                               .map(new UnlabeledTweetMapper(",", normRules));
+		//Unisci le collezioni dei testi dei post e dei commenti e conta il numero
+		JavaDStream<Long> noOfPostings = allPostTexts.union(allCommentTexts)
+				                                     .count();
 		
-		//Calcola una rappresentazione vettoriale dei testi
-		JavaDStream<UnlabeledTweet> vsmClassSet = normClassSet.map(new VectorizerModifier(htf));
+		//Crea una collezione che rappresenta la nuova osservazione di frequenza compiuta
+		JavaPairDStream<String, Long> newFrequencyState = noOfPostings.flatMap(new FrequencyStateMapper("postings", 2000L))
+				                                                      .mapToPair(new MakePairFunction<StateEntry<Long>, String, Long>("stateKey", "stateValue"));
 		
-		//Carica il modello di classificazione
-		NaiveBayesModel model = NaiveBayesModel.load(stsc.sparkContext().sc(), "s3://" + conf.get("ModelInputDir"));
+		//Funzione di aggiornamento per lo stato
+		StatefulAggregator<String, Long> updateFunction = new SumAggregator<String>();
 		
-		//Classifica i tweet per sentimento utilizzando il modello
-		JavaDStream<ClassificationResult> classifiedSet = vsmClassSet.map(new ClassificationMapper(model));
-		
-		//Conta i tweet classificati per sentimento
-		JavaPairDStream<String, Long> sentiment2count = classifiedSet.map(new FieldExtractFunction<ClassificationResult, String>("sentiment"))
-				                                                        .mapToPair(new PairToFunction<String, Long>(1L))
-				                                                        .reduceByKey(new SumReduceFunction());
-		
-//		//Definisci la funzione di aggiornamento
-//		StatefulAggregator<String, Integer> updateFunction = new ConditionalDiffAggregator<String>()
-//				                                                 .withCondition("negative", "0.0");
-//		//Aggiorna lo stato precedente
-//		JavaMapWithStateDStream<String, Integer, Integer, Tuple2<String, Integer>> totals = 
-//				sentiment2count.mapWithState(StateSpec.function(updateFunction).initialState(initialRDD));
-//		
-//		//Ottieni il valore di sentimento come differenza tra post/commenti positivi e post/commenti negativi
-//		JavaDStream<Integer> sentValue = totals.map(new GetPairValueFunction<String, Integer>())
-//				                               .reduce(new SumReduceFunction());
-		
-		//Stampa l'unico elemento di sentValue, vale a dire il valore di sentimento netto nel corso del tempo
-//		sentValue.print();
+		//Aggiorna lo stato precedente
+		JavaMapWithStateDStream<String, Long, Long, Tuple2<String, Long>> frequencyCount =
+				newFrequencyState.mapWithState(StateSpec.function(updateFunction).initialState(initialRDD));
 		
 		stsc.start();
 		stsc.awaitTerminationOrTimeout(timeout);

@@ -1,4 +1,4 @@
-package it.uniroma3.radeon.sportlight.db;
+package it.uniroma3.radeon.sportlight.db.mongo;
 
 import static com.mongodb.client.model.Filters.eq;
 import static com.mongodb.client.model.Projections.exclude;
@@ -17,7 +17,7 @@ import com.mongodb.client.model.IndexOptions;
 import com.mongodb.client.model.UpdateOptions;
 
 import it.uniroma3.radeon.sportlight.data.State;
-import it.uniroma3.radeon.sportlight.db.mongo.MongoDataSource;
+import it.uniroma3.radeon.sportlight.db.StateRepository;
 
 public class MongoStateRepository implements StateRepository {
 	private MongoDataSource mongoDataSource;

@@ -1,11 +1,11 @@
 package it.uniroma3.radeon.sportlight.modules;
 
 import it.uniroma3.radeon.sportlight.db.CommentRepository;
-import it.uniroma3.radeon.sportlight.db.MongoCommentRepository;
-import it.uniroma3.radeon.sportlight.db.MongoPostRepository;
-import it.uniroma3.radeon.sportlight.db.MongoStateRepository;
 import it.uniroma3.radeon.sportlight.db.PostRepository;
 import it.uniroma3.radeon.sportlight.db.StateRepository;
+import it.uniroma3.radeon.sportlight.db.mongo.MongoCommentRepository;
+import it.uniroma3.radeon.sportlight.db.mongo.MongoPostRepository;
+import it.uniroma3.radeon.sportlight.db.mongo.MongoStateRepository;
 
 public abstract class Module {
 

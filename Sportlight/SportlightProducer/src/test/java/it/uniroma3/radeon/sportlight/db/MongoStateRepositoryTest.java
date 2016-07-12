@@ -10,6 +10,7 @@ import it.uniroma3.radeon.sportlight.data.CommentState;
 import it.uniroma3.radeon.sportlight.data.PostState;
 import it.uniroma3.radeon.sportlight.data.State;
 import it.uniroma3.radeon.sportlight.db.mongo.MongoDataSource;
+import it.uniroma3.radeon.sportlight.db.mongo.MongoStateRepository;
 
 public class MongoStateRepositoryTest {
 	private static StateRepository state_repo;

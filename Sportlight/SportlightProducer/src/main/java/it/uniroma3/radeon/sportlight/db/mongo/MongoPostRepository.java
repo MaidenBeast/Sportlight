@@ -1,4 +1,4 @@
-package it.uniroma3.radeon.sportlight.db;
+package it.uniroma3.radeon.sportlight.db.mongo;
 
 import static java.util.Arrays.asList;
 
@@ -28,7 +28,7 @@ import static com.mongodb.client.model.Projections.*;
 import static com.mongodb.client.model.Filters.*;
 
 import it.uniroma3.radeon.sportlight.data.Post;
-import it.uniroma3.radeon.sportlight.db.mongo.MongoDataSource;
+import it.uniroma3.radeon.sportlight.db.PostRepository;
 
 public class MongoPostRepository implements PostRepository {
 	private MongoDataSource mongoDataSource;

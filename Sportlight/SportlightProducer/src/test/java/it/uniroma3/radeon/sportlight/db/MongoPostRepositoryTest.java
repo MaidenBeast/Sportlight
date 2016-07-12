@@ -13,7 +13,9 @@ import org.junit.Test;
 
 import it.uniroma3.radeon.sportlight.data.Comment;
 import it.uniroma3.radeon.sportlight.data.Post;
+import it.uniroma3.radeon.sportlight.db.mongo.MongoCommentRepository;
 import it.uniroma3.radeon.sportlight.db.mongo.MongoDataSource;
+import it.uniroma3.radeon.sportlight.db.mongo.MongoPostRepository;
 
 public class MongoPostRepositoryTest {
 	private static MongoDataSource mongoDataSource;

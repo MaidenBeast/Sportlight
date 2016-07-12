@@ -64,16 +64,18 @@ public class TrendAnalysis {
 		//Definisci la funzione di aggiornamento
 		StatefulAggregator<String, Long> updateFunction = new SumAggregator<String>();
 		//Aggiorna lo stato precedente e ordina per conteggio
-		JavaMapWithStateDStream<String, Long, Long, Tuple2<String, Long>> totals = 
+		JavaMapWithStateDStream<String, Long, Long, Tuple2<String, Long>> updates = 
 				topic2count.mapWithState(StateSpec.function(updateFunction));
+		
+		//Stampa lo stato attuale. Automaticamente questa stampa prenderà i primi 10 elementi
+		JavaPairDStream<String, Long> totals = updates.stateSnapshots();
+		totals.print();
 		
 //		JavaPairDStream<String, Long> orderedTotals = totals.mapToPair(new ReversePairFunction<String, Long>())
 //				                                            .transformToPair(new StreamingSortFunction<Long, String>())
 //				                                            .mapToPair(new ReversePairFunction<Long, String>());
-		//Automaticamente questa stampa prenderà i primi 10 elementi di totals
-		totals.print();
-		
 		stsc.start();
 		stsc.awaitTerminationOrTimeout(timeout);
+		stsc.close();
 	}
 }

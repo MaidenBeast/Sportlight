@@ -100,5 +100,6 @@ public class HeatFollow {
 		
 		stsc.start();
 		stsc.awaitTerminationOrTimeout(timeout);
+		stsc.close();
 	}
 }

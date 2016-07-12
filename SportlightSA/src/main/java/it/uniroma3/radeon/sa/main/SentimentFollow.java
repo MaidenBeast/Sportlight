@@ -105,21 +105,25 @@ public class SentimentFollow {
 				                                                        .mapToPair(new PairToFunction<String, Long>(1L))
 				                                                        .reduceByKey(new SumReduceFunction());
 		
-//		//Definisci la funzione di aggiornamento
-//		StatefulAggregator<String, Integer> updateFunction = new ConditionalDiffAggregator<String>()
-//				                                                 .withCondition("negative", "0.0");
-//		//Aggiorna lo stato precedente
-//		JavaMapWithStateDStream<String, Integer, Integer, Tuple2<String, Integer>> totals = 
-//				sentiment2count.mapWithState(StateSpec.function(updateFunction).initialState(initialRDD));
-//		
-//		//Ottieni il valore di sentimento come differenza tra post/commenti positivi e post/commenti negativi
-//		JavaDStream<Integer> sentValue = totals.map(new GetPairValueFunction<String, Integer>())
-//				                               .reduce(new SumReduceFunction());
+		//Definisci la funzione di aggiornamento
+		StatefulAggregator<String, Long> updateFunction = new ConditionalDiffAggregator<String>()
+				                                              .withNegativeKey("neg");
 		
-		//Stampa l'unico elemento di sentValue, vale a dire il valore di sentimento netto nel corso del tempo
-//		sentValue.print();
+		//Aggiorna lo stato precedente
+		JavaMapWithStateDStream<String, Long, Long, Tuple2<String, Long>> updates =
+				sentiment2count.mapWithState(StateSpec.function(updateFunction).initialState(initialRDD));
+		
+		//Ottieni lo stato attuale ed esegui la differenza tra post/commenti positivi e post/commenti negativi
+		//E' sufficiente la somma algebrica perchè lo stato è aggiornato in maniera che il valore associato ai post negativi sia negativo in segno
+		JavaPairDStream<String, Long> totals = updates.stateSnapshots();
+		
+		JavaDStream<Long> sentValue = totals.map(new GetPairValueFunction<String, Long>())
+				                            .reduce(new SumReduceFunction());
+		
+		sentValue.print();
 		
 		stsc.start();
 		stsc.awaitTerminationOrTimeout(timeout);
+		stsc.close();
 	}
 }

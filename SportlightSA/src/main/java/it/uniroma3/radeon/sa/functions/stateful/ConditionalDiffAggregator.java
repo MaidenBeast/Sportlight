@@ -1,7 +1,7 @@
 package it.uniroma3.radeon.sa.functions.stateful;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.apache.spark.streaming.State;
 
@@ -9,38 +9,37 @@ import scala.Tuple2;
 
 import com.google.common.base.Optional;
 
-public class ConditionalDiffAggregator<K> extends StatefulAggregator<K, Integer> {
+public class ConditionalDiffAggregator<K> extends StatefulAggregator<K, Long> {
 	
 	private static final long serialVersionUID = 1L;
 	
-	private Map<String, K> conditions;
+	private Set<K> negativeKeys;
 	
 	public ConditionalDiffAggregator() {
 		super();
-		this.conditions = new HashMap<>();
+		this.negativeKeys = new HashSet<>();
 	}
 	
-	public ConditionalDiffAggregator<K> withCondition(String condName, K value) {
-		this.conditions.put(condName, value);
+	public ConditionalDiffAggregator<K> withNegativeKey(K negativeKey) {
+		this.negativeKeys.add(negativeKey);
 		return this;
 	}
 	
-	private Boolean verifyCondition(String condition, K value) {
-		K checkValue = this.conditions.get(condition);
-		return checkValue != null && checkValue.equals(value);
+	private Boolean keyIsNegative(K key) {
+		return this.negativeKeys.contains(key);
 	}
-
+	
 	@Override
-	public Tuple2<K, Integer> call(K key, Optional<Integer> newValue, State<Integer> prevValue)
+	public Tuple2<K, Long> call(K key, Optional<Long> newValue, State<Long> prevValue)
 			throws Exception {
-		int sum = newValue.or(0) + this.getStateIfExists(prevValue, 0);
-		Tuple2<K, Integer> output = null;
-		if (this.verifyCondition("negative", key)) {
-			output = new Tuple2<>(key, (-sum));
+		long sum = 0;
+		if (this.keyIsNegative(key)) {
+			sum = this.getStateIfExists(prevValue, 0L) - newValue.or(0L);
 		}
 		else {
-			output = new Tuple2<>(key, sum);
+			sum = this.getStateIfExists(prevValue, 0L) + newValue.or(0L);
 		}
+		Tuple2<K, Long> output = new Tuple2<>(key, sum);
 		prevValue.update(sum);
 		return output;
 	}

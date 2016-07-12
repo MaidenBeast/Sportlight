@@ -12,7 +12,7 @@ public class UnlabeledExampleMapper extends RDDMapper<Post, UnlabeledTweet> {
 	
 	private static final long serialVersionUID = 1L;
 	
-	public UnlabeledExampleMapper(String sep, Map<String, String> translationRules) {
+	public UnlabeledExampleMapper(Map<String, String> translationRules) {
 		this.translationRules = translationRules;
 	}
 	

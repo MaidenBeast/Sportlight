@@ -1,13 +1,18 @@
 package it.uniroma3.radeon.sa.main;
 
 import it.uniroma3.radeon.sa.data.ClassificationResult;
+import it.uniroma3.radeon.sa.data.Comment;
+import it.uniroma3.radeon.sa.data.Post;
 import it.uniroma3.radeon.sa.data.UnlabeledTweet;
 import it.uniroma3.radeon.sa.data.shared.accumulators.SentimentCountAccumulator;
 import it.uniroma3.radeon.sa.functions.FieldExtractFunction;
+import it.uniroma3.radeon.sa.functions.FlattenFunction;
 import it.uniroma3.radeon.sa.functions.GetPairValueFunction;
 import it.uniroma3.radeon.sa.functions.PairToFunction;
 import it.uniroma3.radeon.sa.functions.SumReduceFunction;
 import it.uniroma3.radeon.sa.functions.mappers.ClassificationMapper;
+import it.uniroma3.radeon.sa.functions.mappers.PostMapper;
+import it.uniroma3.radeon.sa.functions.mappers.UnlabeledExampleMapper;
 import it.uniroma3.radeon.sa.functions.mappers.UnlabeledTweetMapper;
 import it.uniroma3.radeon.sa.functions.modifiers.VectorizerModifier;
 import it.uniroma3.radeon.sa.functions.stateful.StatefulAggregator;
@@ -79,14 +84,21 @@ public class ClusterClassifyKafka {
 		HashingTF htf = new HashingTF(1000);
 		
 		//Crea uno stream di tweet da classificare dalla coda Kafka
-		JavaDStream<String> listenedTweets =
+		JavaDStream<Post> listenedPosts =
 				KafkaUtils.createStream(stsc, conf.get("ZKQuorum"), conf.get("ConsumerGroupID"), topics)
-				          .map(new GetPairValueFunction<String, String>());
+				          .map(new GetPairValueFunction<String, String>())
+				          .map(new PostMapper());
 		
-//		listenedTweets.print();
+		//Ottieni dai post una collezione del testo del post e di quello dei commenti associati
+		JavaDStream<String> allPostTexts = listenedPosts.map(new FieldExtractFunction<Post, String>("body"));
 		
-		//Normalizza i tweet da classificare
-		JavaDStream<UnlabeledTweet> normClassSet = listenedTweets.map(new UnlabeledTweetMapper(",", normRules));
+		JavaDStream<String> allCommentTexts = listenedPosts.map(new FieldExtractFunction<Post, List<Comment>>("comments"))
+				                                           .flatMap(new FlattenFunction<Comment>())
+				                                           .map(new FieldExtractFunction<Comment, String>("body"));
+		
+		//Unisci i testi dei post e dei commenti ed effettua la normalizzazione
+		JavaDStream<UnlabeledTweet> normClassSet = allPostTexts.union(allCommentTexts)
+				                                               .map(new UnlabeledTweetMapper(",", normRules));
 		
 		//Calcola una rappresentazione vettoriale dei tweet da classificare
 		JavaDStream<UnlabeledTweet> vsmClassSet = normClassSet.map(new VectorizerModifier(htf));
@@ -106,12 +118,15 @@ public class ClusterClassifyKafka {
 		StatefulAggregator<String, Long> updateFunction = new SumAggregator<String>();
 		
 		//Aggiorna lo stato precedente
-		JavaMapWithStateDStream<String, Long, Long, Tuple2<String, Long>> totals = 
+		JavaMapWithStateDStream<String, Long, Long, Tuple2<String, Long>> updates = 
 				sentiment2count.mapWithState(StateSpec.function(updateFunction).initialState(initialRDD));
 		
+		//Stampa lo stato attuale
+		JavaPairDStream<String, Long> totals = updates.stateSnapshots();
 		totals.print();
 		
 		stsc.start();
 		stsc.awaitTerminationOrTimeout(timeout);
+		stsc.close();
 	}
 }

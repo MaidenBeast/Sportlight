@@ -8,7 +8,7 @@ import it.uniroma3.radeon.sa.functions.FlattenFunction;
 import it.uniroma3.radeon.sa.functions.GetPairValueFunction;
 import it.uniroma3.radeon.sa.functions.mappers.ClassificationMapper2;
 import it.uniroma3.radeon.sa.functions.mappers.PostMapper;
-import it.uniroma3.radeon.sa.functions.mappers.UnlabeledTweetMapper;
+import it.uniroma3.radeon.sa.functions.mappers.UnlabeledExampleMapper;
 import it.uniroma3.radeon.sa.functions.modifiers.VectorizerModifier;
 import it.uniroma3.radeon.sa.functions.stateful.StatefulAggregator;
 import it.uniroma3.radeon.sa.functions.stateful.SumAggregator;
@@ -84,7 +84,7 @@ public class ClusterClassifyKafka {
 		
 		//Unisci i testi dei post e dei commenti ed effettua la normalizzazione
 		JavaDStream<UnlabeledExample> normClassSet = allPostTexts.union(allCommentTexts)
-				                                                 .map(new UnlabeledTweetMapper(",", normRules));
+				                                                 .map(new UnlabeledExampleMapper(normRules));
 		
 		//Calcola una rappresentazione vettoriale dei tweet da classificare
 		JavaDStream<UnlabeledExample> vsmClassSet = normClassSet.map(new VectorizerModifier(htf));

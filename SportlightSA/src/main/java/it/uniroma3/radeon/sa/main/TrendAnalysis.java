@@ -14,6 +14,7 @@ import it.uniroma3.radeon.sa.functions.stateful.SumAggregator;
 import it.uniroma3.radeon.sa.utils.Parsing;
 import it.uniroma3.radeon.sa.utils.PropertyLoader;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -58,8 +59,7 @@ public class TrendAnalysis {
 		//Per ogni post preleva e conta gli argomenti
 		JavaPairDStream<String, Long> topic2count = listenedPosts.map(new FieldExtractFunction<Post, List<String>>("topics"))
 				                                                    .flatMap(new FlattenFunction<String>())
-				                                                    .mapToPair(new PairToFunction<String, Long>(1L))
-				                                                    .reduceByKey(new SumReduceFunction());
+				                                                    .countByValue();
 		
 		//Definisci la funzione di aggiornamento
 		StatefulAggregator<String, Long> updateFunction = new SumAggregator<String>();
@@ -67,13 +67,15 @@ public class TrendAnalysis {
 		JavaMapWithStateDStream<String, Long, Long, Tuple2<String, Long>> updates = 
 				topic2count.mapWithState(StateSpec.function(updateFunction));
 		
-		//Stampa lo stato attuale. Automaticamente questa stampa prenderà i primi 10 elementi
+		//Ottieni lo stato attuale
 		JavaPairDStream<String, Long> totals = updates.stateSnapshots();
-		totals.print();
 		
-//		JavaPairDStream<String, Long> orderedTotals = totals.mapToPair(new ReversePairFunction<String, Long>())
-//				                                            .transformToPair(new StreamingSortFunction<Long, String>())
-//				                                            .mapToPair(new ReversePairFunction<Long, String>());
+		//Ordina i conteggi in ordine decrescente
+		JavaPairDStream<String, Long> orderedTotals = totals.mapToPair(new ReversePairFunction<String, Long>())
+				                                            .transformToPair(new StreamingSortFunction<Long, String>())
+				                                            .mapToPair(new ReversePairFunction<Long, String>());
+		orderedTotals.print();
+		
 		stsc.start();
 		stsc.awaitTerminationOrTimeout(timeout);
 		stsc.close();

@@ -3,6 +3,7 @@ package it.uniroma3.radeon.sa.functions.mappers;
 import java.util.ArrayList;
 import java.util.List;
 
+import scala.Tuple2;
 import it.uniroma3.radeon.sa.data.stateful.StateEntry;
 
 public class FrequencyStateMapper extends StateDefinerMapper<Long> {
@@ -17,10 +18,10 @@ public class FrequencyStateMapper extends StateDefinerMapper<Long> {
 		this.timestep = timestep;
 	}
 
-	public Iterable<StateEntry<Long>> call(Long count) throws Exception {
-		List<StateEntry<Long>> stateEntries = new ArrayList<>();
-		stateEntries.add(new StateEntry<Long>(this.countKey, count));
-		stateEntries.add(new StateEntry<Long>("time", this.timestep));
+	public Iterable<Tuple2<String, Long>> call(Long count) throws Exception {
+		List<Tuple2<String, Long>> stateEntries = new ArrayList<>();
+		stateEntries.add(new Tuple2<>(this.countKey, count));
+		stateEntries.add(new Tuple2<>("time", this.timestep));
 		return stateEntries;
 	}
 }

@@ -30,8 +30,6 @@ public class Comment implements Serializable {
 	}
 	
 	public String toString() {
-		return "[" + this.id + "]" + "\n"
-	           + "Body: " + this.body + "\n"
-	           + "Type: " + this.type + "\n";
+		return "[" + this.id + "] " + this.body + "\n";
 	}
 }

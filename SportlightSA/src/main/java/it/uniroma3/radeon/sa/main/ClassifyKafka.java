@@ -1,7 +1,7 @@
 package it.uniroma3.radeon.sa.main;
 
 import it.uniroma3.radeon.sa.data.ClassificationResult;
-import it.uniroma3.radeon.sa.data.UnlabeledTweet;
+import it.uniroma3.radeon.sa.data.UnlabeledExample;
 import it.uniroma3.radeon.sa.functions.FieldExtractFunction;
 import it.uniroma3.radeon.sa.functions.GetPairValueFunction;
 import it.uniroma3.radeon.sa.functions.PairToFunction;
@@ -67,10 +67,10 @@ public class ClassifyKafka {
 				          .map(new GetPairValueFunction<String, String>());
 		
 		//Normalizza i tweet da classificare
-		JavaDStream<UnlabeledTweet> normClassSet = listenedTweets.map(new UnlabeledTweetMapper(",", translationRules));
+		JavaDStream<UnlabeledExample> normClassSet = listenedTweets.map(new UnlabeledTweetMapper(",", translationRules));
 		
 		//Calcola una rappresentazione vettoriale dei tweet da classificare
-		JavaDStream<UnlabeledTweet> vsmClassSet = normClassSet.map(new VectorizerModifier(htf));
+		JavaDStream<UnlabeledExample> vsmClassSet = normClassSet.map(new VectorizerModifier(htf));
 		
 		//Carica il modello di classificazione
 		NaiveBayesModel model = NaiveBayesModel.load(stsc.sparkContext().sc(), "file://" + conf.get("ModelInputDir"));

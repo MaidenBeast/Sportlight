@@ -1,13 +1,8 @@
 package it.uniroma3.radeon.sa.functions.mappers;
 
-import java.util.ArrayList;
-import java.util.List;
+import org.apache.spark.api.java.function.PairFlatMapFunction;
 
-import it.uniroma3.radeon.sa.data.stateful.StateEntry;
-
-import org.apache.spark.api.java.function.FlatMapFunction;
-
-public abstract class StateDefinerMapper<T> implements FlatMapFunction<T, StateEntry<T>> {
+public abstract class StateDefinerMapper<T> implements PairFlatMapFunction<T, String, T> {
 	
 	private static final long serialVersionUID = 1L;
 }

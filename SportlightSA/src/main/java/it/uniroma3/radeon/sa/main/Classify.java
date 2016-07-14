@@ -1,7 +1,7 @@
 package it.uniroma3.radeon.sa.main;
 
 import it.uniroma3.radeon.sa.data.ClassificationResult;
-import it.uniroma3.radeon.sa.data.UnlabeledTweet;
+import it.uniroma3.radeon.sa.data.UnlabeledExample;
 import it.uniroma3.radeon.sa.functions.mappers.ClassificationMapper;
 import it.uniroma3.radeon.sa.functions.mappers.UnlabeledTweetMapper;
 import it.uniroma3.radeon.sa.functions.modifiers.VectorizerModifier;
@@ -45,11 +45,11 @@ public class Classify {
 		HashingTF htf = new HashingTF(1000);
 		
 		//Carica e normalizza i tweet da classificare
-		JavaRDD<UnlabeledTweet> normClassSet = sc.textFile("file://" + conf.get("RawTweets"))
+		JavaRDD<UnlabeledExample> normClassSet = sc.textFile("file://" + conf.get("RawTweets"))
 				                                 .map(new UnlabeledTweetMapper(",", translationRules));
 		
 		//Calcola una rappresentazione vettoriale dei tweet da classificare
-		JavaRDD<UnlabeledTweet> vsmClassSet = normClassSet.map(new VectorizerModifier(htf));
+		JavaRDD<UnlabeledExample> vsmClassSet = normClassSet.map(new VectorizerModifier(htf));
 		
 		//Carica il modello di classificazione
 		NaiveBayesModel model = NaiveBayesModel.load(sc.sc(), "file://" + conf.get("ModelInputDir"));

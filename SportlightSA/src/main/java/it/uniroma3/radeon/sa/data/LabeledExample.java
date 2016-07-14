@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 import org.apache.spark.mllib.regression.LabeledPoint;
 
-public class LabeledTweet implements Serializable {
+public class LabeledExample implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 	
@@ -12,7 +12,7 @@ public class LabeledTweet implements Serializable {
 	private LabeledPoint labeledVector;
 	private Double sentiment;
 	
-	public LabeledTweet() {}
+	public LabeledExample() {}
 
 	public String getText() {
 		return text;

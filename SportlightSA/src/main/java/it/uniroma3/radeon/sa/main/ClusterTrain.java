@@ -1,6 +1,6 @@
 package it.uniroma3.radeon.sa.main;
 
-import it.uniroma3.radeon.sa.data.LabeledTweet;
+import it.uniroma3.radeon.sa.data.LabeledExample;
 import it.uniroma3.radeon.sa.functions.FieldExtractFunction;
 import it.uniroma3.radeon.sa.functions.mappers.EvaluationMapper;
 import it.uniroma3.radeon.sa.functions.mappers.LabeledTweetMapper;
@@ -29,12 +29,13 @@ public class ClusterTrain {
 		
 		Properties prop = PropertyLoader.loadProperties(configFile);
 		
-		//Carica localmente le regole di normalizzazione
-		Map<String, String> normRules = Parsing.ruleParser(prop.get("normRules").toString(), "=");
-		
 		SparkConf conf = new SparkConf().setAppName("Sentiment Analysis trainer")
+										.set("NormRules", prop.get("normRules").toString())
 										.set("RawTweets", prop.get("rawTweets").toString())
 		                                .set("ModelOutputDir", prop.get("modelOutputDir").toString());
+		
+		//Carica localmente le regole di normalizzazione
+		Map<String, String> normRules = Parsing.ruleParser(prop.get("normRules").toString(), "=");
 		
 		JavaSparkContext sc = new JavaSparkContext(conf);
 		
@@ -42,14 +43,14 @@ public class ClusterTrain {
 		HashingTF htf = new HashingTF(1000);
 		
 		//Carica e normalizza il training set
-		JavaRDD<LabeledTweet> normTrainingSet = sc.textFile("s3n://" + conf.get("RawTweets"))
+		JavaRDD<LabeledExample> normTrainingSet = sc.textFile("s3n://" + conf.get("RawTweets"))
 				                                   .map(new LabeledTweetMapper(",", normRules));
 		
 		//Calcola una rappresentazione vettoriale dei tweet etichettati
-		JavaRDD<LabeledTweet> vsmTrainingSet = normTrainingSet.map(new LabeledPointModifier(htf));
+		JavaRDD<LabeledExample> vsmTrainingSet = normTrainingSet.map(new LabeledPointModifier(htf));
 		
 		//Dividi il training set in training e test
-		JavaRDD<LabeledPoint>[] splitSet = vsmTrainingSet.map(new FieldExtractFunction<LabeledTweet, LabeledPoint>("labeledVector"))
+		JavaRDD<LabeledPoint>[] splitSet = vsmTrainingSet.map(new FieldExtractFunction<LabeledExample, LabeledPoint>("labeledVector"))
 				                                         .randomSplit(new double[]{0.6, 0.4}, 11L);
 		JavaRDD<LabeledPoint> training = splitSet[0];
 		JavaRDD<LabeledPoint> test = splitSet[1];

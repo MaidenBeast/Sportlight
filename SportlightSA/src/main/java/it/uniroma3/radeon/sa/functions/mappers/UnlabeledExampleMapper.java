@@ -1,12 +1,12 @@
 package it.uniroma3.radeon.sa.functions.mappers;
 
 import it.uniroma3.radeon.sa.data.Post;
-import it.uniroma3.radeon.sa.data.UnlabeledTweet;
+import it.uniroma3.radeon.sa.data.UnlabeledExample;
 import it.uniroma3.radeon.sa.utils.TextCleaner;
 
 import java.util.Map;
 
-public class UnlabeledExampleMapper extends RDDMapper<Post, UnlabeledTweet> {
+public class UnlabeledExampleMapper extends RDDMapper<String, UnlabeledExample> {
 	
 	private Map<String, String> translationRules;
 	
@@ -16,10 +16,9 @@ public class UnlabeledExampleMapper extends RDDMapper<Post, UnlabeledTweet> {
 		this.translationRules = translationRules;
 	}
 	
-	public UnlabeledTweet call(Post post) {
-		UnlabeledTweet tweet = new UnlabeledTweet();
-		String postText = post.getBody();
-		tweet.setText(new TextCleaner(this.translationRules).cleanUp(postText));
-		return tweet;
+	public UnlabeledExample call(String text) {
+		UnlabeledExample example = new UnlabeledExample();
+		example.setText(new TextCleaner(this.translationRules).cleanUp(text));
+		return example;
 	}
 }

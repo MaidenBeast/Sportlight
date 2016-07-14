@@ -1,5 +1,6 @@
 package it.uniroma3.radeon.sa.utils;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.spark.api.java.JavaPairRDD;
@@ -13,6 +14,7 @@ public class StateMaker<V> {
 	JavaSparkContext sc;
 	
 	public StateMaker(JavaSparkContext sc) {
+		this.initialEntries = new ArrayList<>();
 		this.sc = sc;
 	}
 	

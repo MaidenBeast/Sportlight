@@ -3,50 +3,39 @@ package it.uniroma3.radeon.sa.main;
 import it.uniroma3.radeon.sa.data.ClassificationResult;
 import it.uniroma3.radeon.sa.data.Comment;
 import it.uniroma3.radeon.sa.data.Post;
-import it.uniroma3.radeon.sa.data.UnlabeledTweet;
-import it.uniroma3.radeon.sa.data.shared.accumulators.SentimentCountAccumulator;
+import it.uniroma3.radeon.sa.data.UnlabeledExample;
 import it.uniroma3.radeon.sa.functions.FieldExtractFunction;
 import it.uniroma3.radeon.sa.functions.FlattenFunction;
 import it.uniroma3.radeon.sa.functions.GetPairValueFunction;
 import it.uniroma3.radeon.sa.functions.PairToFunction;
 import it.uniroma3.radeon.sa.functions.SumReduceFunction;
 import it.uniroma3.radeon.sa.functions.mappers.ClassificationMapper;
+import it.uniroma3.radeon.sa.functions.mappers.ClassificationMapper2;
 import it.uniroma3.radeon.sa.functions.mappers.PostMapper;
-import it.uniroma3.radeon.sa.functions.mappers.UnlabeledExampleMapper;
 import it.uniroma3.radeon.sa.functions.mappers.UnlabeledTweetMapper;
 import it.uniroma3.radeon.sa.functions.modifiers.VectorizerModifier;
 import it.uniroma3.radeon.sa.functions.stateful.StatefulAggregator;
 import it.uniroma3.radeon.sa.functions.stateful.SumAggregator;
-
-import org.apache.spark.api.java.JavaPairRDD;
-import org.apache.spark.api.java.function.Function3;
-import org.apache.spark.api.java.function.VoidFunction;
-
 import it.uniroma3.radeon.sa.utils.Parsing;
 import it.uniroma3.radeon.sa.utils.PropertyLoader;
 import it.uniroma3.radeon.sa.utils.StateMaker;
 
-import java.io.FileReader;
-import java.util.Arrays;
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-import org.apache.spark.Accumulator;
 import org.apache.spark.SparkConf;
+import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.mllib.classification.NaiveBayesModel;
 import org.apache.spark.mllib.feature.HashingTF;
 import org.apache.spark.streaming.Durations;
-import org.apache.spark.streaming.State;
 import org.apache.spark.streaming.StateSpec;
 import org.apache.spark.streaming.api.java.JavaDStream;
 import org.apache.spark.streaming.api.java.JavaMapWithStateDStream;
 import org.apache.spark.streaming.api.java.JavaPairDStream;
 import org.apache.spark.streaming.api.java.JavaStreamingContext;
 import org.apache.spark.streaming.kafka.KafkaUtils;
-
-import com.google.common.base.Optional;
 
 import scala.Tuple2;
 
@@ -90,29 +79,28 @@ public class ClusterClassifyKafka {
 				          .map(new PostMapper());
 		
 		//Ottieni dai post una collezione del testo del post e di quello dei commenti associati
-		JavaDStream<String> allPostTexts = listenedPosts.map(new FieldExtractFunction<Post, String>("body"));
+		JavaDStream<String> allPostTexts = listenedPosts.map(new FieldExtractFunction<Post, String>("body", ""));
 		
-		JavaDStream<String> allCommentTexts = listenedPosts.map(new FieldExtractFunction<Post, List<Comment>>("comments"))
+		JavaDStream<String> allCommentTexts = listenedPosts.map(new FieldExtractFunction<Post, List<Comment>>("comments", new ArrayList<Comment>()))
 				                                           .flatMap(new FlattenFunction<Comment>())
-				                                           .map(new FieldExtractFunction<Comment, String>("body"));
+				                                           .map(new FieldExtractFunction<Comment, String>("body", ""));
+	
 		
 		//Unisci i testi dei post e dei commenti ed effettua la normalizzazione
-		JavaDStream<UnlabeledTweet> normClassSet = allPostTexts.union(allCommentTexts)
-				                                               .map(new UnlabeledTweetMapper(",", normRules));
+		JavaDStream<UnlabeledExample> normClassSet = allPostTexts.union(allCommentTexts)
+				                                                 .map(new UnlabeledTweetMapper(",", normRules));
 		
 		//Calcola una rappresentazione vettoriale dei tweet da classificare
-		JavaDStream<UnlabeledTweet> vsmClassSet = normClassSet.map(new VectorizerModifier(htf));
+		JavaDStream<UnlabeledExample> vsmClassSet = normClassSet.map(new VectorizerModifier(htf));
 		
 		//Carica il modello di classificazione
 		NaiveBayesModel model = NaiveBayesModel.load(stsc.sparkContext().sc(), "s3://" + conf.get("ModelInputDir"));
 		
 		//Classifica i tweet per sentimento utilizzando il modello
-		JavaDStream<ClassificationResult> classifiedSet = vsmClassSet.map(new ClassificationMapper(model));
+		JavaDStream<String> classifiedSet = vsmClassSet.map(new ClassificationMapper2(model));
 		
 		//Conta i tweet classificati per sentimento
-		JavaPairDStream<String, Long> sentiment2count = classifiedSet.map(new FieldExtractFunction<ClassificationResult, String>("sentiment"))
-				                                                     .mapToPair(new PairToFunction<String, Long>(1L))
-				                                                     .reduceByKey(new SumReduceFunction());
+		JavaPairDStream<String, Long> sentiment2count = classifiedSet.countByValue();
 		
 		//Funzione di aggiornamento
 		StatefulAggregator<String, Long> updateFunction = new SumAggregator<String>();

@@ -1,6 +1,6 @@
 package it.uniroma3.radeon.sa.functions.modifiers;
 
-import it.uniroma3.radeon.sa.data.UnlabeledTweet;
+import it.uniroma3.radeon.sa.data.UnlabeledExample;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -8,7 +8,7 @@ import java.util.List;
 import org.apache.spark.mllib.feature.HashingTF;
 import org.apache.spark.mllib.linalg.Vector;
 
-public class VectorizerModifier extends Modifier<UnlabeledTweet> {
+public class VectorizerModifier extends Modifier<UnlabeledExample> {
 	
 	private HashingTF converter;
 	private static final long serialVersionUID = 1L;
@@ -17,7 +17,7 @@ public class VectorizerModifier extends Modifier<UnlabeledTweet> {
 		this.converter = converter;
 	}
 
-	public UnlabeledTweet call(UnlabeledTweet raw) throws Exception {
+	public UnlabeledExample call(UnlabeledExample raw) throws Exception {
 		String text = raw.getText();
 		List<String> words = new ArrayList<>();
 		for (String w : text.split(" ")) {

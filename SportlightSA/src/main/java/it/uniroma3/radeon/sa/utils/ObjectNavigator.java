@@ -13,8 +13,14 @@ public class ObjectNavigator {
 		this.instanceType = type;
 	}
 	
-	public Object retrieveField(String field) {
-		return this.accessField(field);
+	public Object retrieveField(String field) throws NullPointerException {
+		Object res = this.accessField(field);
+		if (res != null) {
+			return res;
+		}
+		else {
+			throw new NullPointerException();
+		}
 	}
 
 	public Object retrieveField(String[] fieldPath) {

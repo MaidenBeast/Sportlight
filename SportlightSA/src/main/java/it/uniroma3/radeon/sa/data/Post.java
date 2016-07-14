@@ -76,11 +76,11 @@ public class Post implements Serializable {
 	}
 
 	public String toString() {
-		return "[" + this.id + "] " + "(" + this.src + ") " + "Type: " + this.type + "\n"
+		return "[" + this.id + "] " + "(" + this.src + ") "
 	           + "Title: " + this.title + "\n"
-	           + "Topics: " + this.topics + "\n"
+	           + "Topics: " + this.topics.toString() + "\n"
 	           + "Body: " + this.body + "\n"
 	           + "Comments: " + "\n"
-	           + this.comments + "\n";
+	           + this.comments.toString() + "\n";
 	}
 }

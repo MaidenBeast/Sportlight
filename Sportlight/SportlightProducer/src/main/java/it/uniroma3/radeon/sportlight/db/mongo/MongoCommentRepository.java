@@ -1,4 +1,4 @@
-package it.uniroma3.radeon.sportlight.db;
+package it.uniroma3.radeon.sportlight.db.mongo;
 
 import static com.mongodb.client.model.Filters.eq;
 import static com.mongodb.client.model.Projections.elemMatch;
@@ -24,7 +24,7 @@ import com.mongodb.client.model.UpdateOneModel;
 import com.mongodb.client.model.WriteModel;
 
 import it.uniroma3.radeon.sportlight.data.Comment;
-import it.uniroma3.radeon.sportlight.db.mongo.MongoDataSource;
+import it.uniroma3.radeon.sportlight.db.CommentRepository;
 
 public class MongoCommentRepository implements CommentRepository {
 	private MongoDataSource mongoDataSource;

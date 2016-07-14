@@ -1,6 +1,5 @@
 package it.uniroma3.radeon.sa.functions.mappers;
 
-import it.uniroma3.radeon.sa.data.ClassificationResult;
 import it.uniroma3.radeon.sa.data.UnlabeledExample;
 
 import org.apache.spark.mllib.classification.NaiveBayesModel;

@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import scala.Tuple2;
-import it.uniroma3.radeon.sa.data.stateful.StateEntry;
 
 public class FrequencyStateMapper extends StateDefinerMapper<Long> {
 	

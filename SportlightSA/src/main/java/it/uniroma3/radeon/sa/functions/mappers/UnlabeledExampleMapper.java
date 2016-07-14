@@ -1,6 +1,5 @@
 package it.uniroma3.radeon.sa.functions.mappers;
 
-import it.uniroma3.radeon.sa.data.Post;
 import it.uniroma3.radeon.sa.data.UnlabeledExample;
 import it.uniroma3.radeon.sa.utils.TextCleaner;
 

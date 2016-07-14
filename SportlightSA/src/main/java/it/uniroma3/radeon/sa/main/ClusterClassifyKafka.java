@@ -1,15 +1,11 @@
 package it.uniroma3.radeon.sa.main;
 
-import it.uniroma3.radeon.sa.data.ClassificationResult;
 import it.uniroma3.radeon.sa.data.Comment;
 import it.uniroma3.radeon.sa.data.Post;
 import it.uniroma3.radeon.sa.data.UnlabeledExample;
 import it.uniroma3.radeon.sa.functions.FieldExtractFunction;
 import it.uniroma3.radeon.sa.functions.FlattenFunction;
 import it.uniroma3.radeon.sa.functions.GetPairValueFunction;
-import it.uniroma3.radeon.sa.functions.PairToFunction;
-import it.uniroma3.radeon.sa.functions.SumReduceFunction;
-import it.uniroma3.radeon.sa.functions.mappers.ClassificationMapper;
 import it.uniroma3.radeon.sa.functions.mappers.ClassificationMapper2;
 import it.uniroma3.radeon.sa.functions.mappers.PostMapper;
 import it.uniroma3.radeon.sa.functions.mappers.UnlabeledTweetMapper;

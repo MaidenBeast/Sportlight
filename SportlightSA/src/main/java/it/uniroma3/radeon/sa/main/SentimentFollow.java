@@ -1,6 +1,5 @@
 package it.uniroma3.radeon.sa.main;
 
-import it.uniroma3.radeon.sa.data.ClassificationResult;
 import it.uniroma3.radeon.sa.data.Comment;
 import it.uniroma3.radeon.sa.data.Post;
 import it.uniroma3.radeon.sa.data.UnlabeledExample;
@@ -8,24 +7,18 @@ import it.uniroma3.radeon.sa.functions.FieldContainsFunction;
 import it.uniroma3.radeon.sa.functions.FieldExtractFunction;
 import it.uniroma3.radeon.sa.functions.FlattenFunction;
 import it.uniroma3.radeon.sa.functions.GetPairValueFunction;
-import it.uniroma3.radeon.sa.functions.PairToFunction;
 import it.uniroma3.radeon.sa.functions.SumReduceFunction;
-import it.uniroma3.radeon.sa.functions.mappers.ClassificationMapper;
 import it.uniroma3.radeon.sa.functions.mappers.ClassificationMapper2;
 import it.uniroma3.radeon.sa.functions.mappers.PostMapper;
 import it.uniroma3.radeon.sa.functions.mappers.UnlabeledExampleMapper;
-import it.uniroma3.radeon.sa.functions.mappers.UnlabeledTweetMapper;
 import it.uniroma3.radeon.sa.functions.modifiers.VectorizerModifier;
 import it.uniroma3.radeon.sa.functions.stateful.ConditionalDiffAggregator;
 import it.uniroma3.radeon.sa.functions.stateful.StatefulAggregator;
-import it.uniroma3.radeon.sa.functions.stateful.SumAggregator;
 import it.uniroma3.radeon.sa.utils.Parsing;
 import it.uniroma3.radeon.sa.utils.PropertyLoader;
 import it.uniroma3.radeon.sa.utils.StateMaker;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;

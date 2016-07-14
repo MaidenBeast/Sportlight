@@ -1,41 +1,26 @@
 package it.uniroma3.radeon.sa.main;
 
-import it.uniroma3.radeon.sa.data.ClassificationResult;
 import it.uniroma3.radeon.sa.data.Comment;
 import it.uniroma3.radeon.sa.data.Post;
-import it.uniroma3.radeon.sa.data.UnlabeledExample;
-import it.uniroma3.radeon.sa.data.stateful.StateEntry;
 import it.uniroma3.radeon.sa.functions.DivideFunction;
 import it.uniroma3.radeon.sa.functions.FieldContainsFunction;
 import it.uniroma3.radeon.sa.functions.FieldExtractFunction;
 import it.uniroma3.radeon.sa.functions.FlattenFunction;
 import it.uniroma3.radeon.sa.functions.GetPairValueFunction;
-import it.uniroma3.radeon.sa.functions.MakePairFunction;
-import it.uniroma3.radeon.sa.functions.PairToFunction;
-import it.uniroma3.radeon.sa.functions.ReversePairFunction;
-import it.uniroma3.radeon.sa.functions.SumReduceFunction;
-import it.uniroma3.radeon.sa.functions.mappers.ClassificationMapper;
 import it.uniroma3.radeon.sa.functions.mappers.FrequencyStateMapper;
 import it.uniroma3.radeon.sa.functions.mappers.PostMapper;
-import it.uniroma3.radeon.sa.functions.mappers.UnlabeledTweetMapper;
-import it.uniroma3.radeon.sa.functions.modifiers.VectorizerModifier;
-import it.uniroma3.radeon.sa.functions.stateful.ConditionalDiffAggregator;
 import it.uniroma3.radeon.sa.functions.stateful.StatefulAggregator;
 import it.uniroma3.radeon.sa.functions.stateful.SumAggregator;
 import it.uniroma3.radeon.sa.utils.Parsing;
 import it.uniroma3.radeon.sa.utils.PropertyLoader;
 import it.uniroma3.radeon.sa.utils.StateMaker;
 
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaPairRDD;
-import org.apache.spark.mllib.classification.NaiveBayesModel;
-import org.apache.spark.mllib.feature.HashingTF;
 import org.apache.spark.streaming.Durations;
 import org.apache.spark.streaming.StateSpec;
 import org.apache.spark.streaming.api.java.JavaDStream;
